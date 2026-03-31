@@ -626,8 +626,17 @@ async function updateRankings() {
     const nameInput = document.getElementById('player-name');
     const submitBtn = document.getElementById('submit-score-btn');
     const name = nameInput.value.trim() || '익명';
-    
     const originalBtnText = submitBtn.innerText;
+
+    // Failsafe: 10초 후 무조건 버튼 복구
+    const failsafe = setTimeout(() => {
+        if (isSaving) {
+            isSaving = false;
+            submitBtn.innerText = originalBtnText;
+            submitBtn.disabled = false;
+            console.warn("Failsafe triggered - Ranking save timed out");
+        }
+    }, 10000);
 
     try {
         isSaving = true;
@@ -635,10 +644,12 @@ async function updateRankings() {
         submitBtn.disabled = true;
 
         console.log("Saving record for:", name, score, level);
-        
+        // alert("저장 시도 중..."); // 1단계
+
         // 클라우드 저장 (Firebase)
         if (window.db && window.fb_addDoc) {
             try {
+                // alert("클라우드 전송 시작..."); // 2단계
                 await window.fb_addDoc(window.fb_collection(window.db, 'rankings'), {
                     name: name,
                     score: score,
@@ -649,22 +660,29 @@ async function updateRankings() {
                 alert("기록이 성공적으로 저장되었습니다!");
             } catch (error) {
                 console.error("Cloud Save Failed:", error);
-                alert("클라우드 저장 실패: " + error.message + "\n로컬에 저장합니다.");
+                alert("클라우드 저장 실패: " + error.message);
                 saveLocalScore(name, score, level);
             }
         } else {
-            console.warn("Firebase not initialized, using local fallback");
+            console.warn("Firebase not initialized, check index.html");
+            alert("Firebase가 초기화되지 않았습니다. 로컬에 저장합니다.");
             saveLocalScore(name, score, level);
         }
         
-        // 저장 후 입력창 숨기기
+        // 버튼 복구 및 입력창 숨기기
+        clearTimeout(failsafe);
+        isSaving = false;
+        submitBtn.innerText = originalBtnText;
+        submitBtn.disabled = false;
         document.getElementById('rank-input-area').style.display = 'none';
+
+        // 랭킹 갱신
         await showHighScores();
     } catch (globalError) {
-        console.error("Unexpected error in updateRankings:", globalError);
-        alert("알 수 없는 오류가 발생했습니다: " + globalError.message);
+        console.error("Overall error in updateRankings:", globalError);
+        alert("치명적 오류 발생: " + globalError.message);
     } finally {
-        // 무조건 상태 복구
+        clearTimeout(failsafe);
         isSaving = false;
         submitBtn.innerText = originalBtnText;
         submitBtn.disabled = false;
