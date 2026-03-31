@@ -619,7 +619,11 @@ function handleGameOver() {
 }
 
 async function updateRankings() {
-    const name = document.getElementById('player-name').value.trim() || '익명';
+    const nameInput = document.getElementById('player-name');
+    const name = nameInput.value.trim() || '익명';
+    
+    console.log("Saving record for:", name, score, level);
+    // alert("등록을 시작합니다: " + name + " (점수: " + score + ")");
     
     // 클라우드 저장 (Firebase)
     if (window.db) {
@@ -830,6 +834,13 @@ document.addEventListener('keydown', event => {
 document.getElementById('start-btn').addEventListener('click', startGame);
 document.getElementById('restart-btn').addEventListener('click', restartGame);
 document.getElementById('submit-score-btn').addEventListener('click', updateRankings);
+
+// 엔터키 지원
+document.getElementById('player-name').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        updateRankings();
+    }
+});
 
 // 모바일 컨트롤 이벤트 (Mobile Control Events)
 const addTouchListener = (id, action) => {
