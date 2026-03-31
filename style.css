@@ -223,14 +223,16 @@ button:hover {
 
 button.primary-btn {
     border: none;
+    background: transparent;
     font-weight: 700;
-    font-size: min(1.1rem, 4vh);
-    padding: min(12px, 2vh) 25px;
-    box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
-    white-space: nowrap; /* 한 줄 유지 */
+    font-size: min(1.5rem, 6vh);
+    padding: 10px;
+    color: var(--neon-blue);
+    text-shadow: 0 0 10px var(--neon-blue);
+    white-space: nowrap;
     width: auto;
-    min-width: 180px;
-    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+    min-width: unset;
+    box-shadow: none;
 }
 
 button.primary-btn:hover {
