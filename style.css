@@ -128,12 +128,11 @@ body {
     max-width: 380px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* 상단부터 채우기 */
+    justify-content: center; /* 다시 중앙 정렬 (5위까지만이라서 공간 충분) */
     align-items: center;
-    gap: 1.2vh;
-    max-height: 95vh; /* 화면을 넘지 않도록 */
-    overflow-y: auto; /* 내용이 많으면 스크롤 */
-    -webkit-overflow-scrolling: touch;
+    gap: 1vh;
+    max-height: 98vh;
+    overflow-y: hidden; /* 스크롤 제거 */
 }
 
 .overlay-content h1 {
@@ -259,40 +258,41 @@ body {
         display: none;
     }
     .score-item {
-        padding: 1vh 0;
-        gap: 8px;
-        flex-wrap: nowrap; /* 절대 줄바꿈 방지 */
+        padding: 0.8vh 0;
+        gap: 5px;
+        flex-wrap: nowrap;
     }
     .rank-name {
-        flex: 1.8; /* 이름 공간을 더 확보 */
-        min-width: 0;
-        font-size: clamp(0.8rem, 4vw, 1rem); 
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        flex: 1.5;
+        font-size: clamp(0.7rem, 3.8vw, 0.9rem);
+        white-space: normal; /* 말줄임표 제거 및 글자 맞춤 */
+        text-align: left;
     }
     .rank-score {
-        flex: 1; /* 점수는 성격에 맞게 flex 조절 */
-        min-width: 80px; /* 최소 너비 확보로 1-2글자 제한 방지 */
-        font-size: clamp(0.8rem, 4vw, 1rem);
+        flex: 1;
+        font-size: clamp(0.7rem, 3.8vw, 0.9rem);
         text-align: right;
+    }
+    .high-scores-list {
+        padding: 10px;
+        margin-top: 5px;
     }
 }
 
 /* 초소형 휴대폰 대응 (Extra Small Devices) */
 @media (max-width: 340px) {
-    .high-scores-list {
-        padding: 10px;
-    }
     .score-item {
-        gap: 5px;
+        gap: 3px;
+    }
+    .rank-name, .rank-score {
+        font-size: 0.75rem;
     }
 }
 
 .start-rankings {
-    max-height: 25vh;
-    overflow-y: auto;
-    margin-top: 10px;
+    max-height: none; /* 5위까지만이라 높이 제한 불필요 */
+    overflow-y: hidden; /* 스크롤 제거 */
+    margin-top: 5px;
     width: 100%;
 }
 

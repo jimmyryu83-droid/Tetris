@@ -734,15 +734,18 @@ async function showHighScores() {
         rankings = JSON.parse(localStorage.getItem(RANK_KEY) || '[]');
     }
     
-    // 랭킹 리스트 렌더링
+    // 랭킹 리스트 렌더링 (모바일은 상위 5위만 표시)
+    const isMobile = window.innerWidth < 600;
+    const displayRankings = isMobile ? rankings.slice(0, 5) : rankings;
+
     containers.forEach(container => {
         container.innerHTML = '';
-        if (rankings.length === 0) {
+        if (displayRankings.length === 0) {
             container.innerHTML = '<li class="score-item" style="justify-content:center; color:rgba(255,255,255,0.3);">아직 기록이 없습니다</li>';
             return;
         }
 
-        rankings.forEach((entry, index) => {
+        displayRankings.forEach((entry, index) => {
             const li = document.createElement('li');
             li.classList.add('score-item');
             li.innerHTML = `
