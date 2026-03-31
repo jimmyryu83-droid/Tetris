@@ -627,42 +627,48 @@ async function updateRankings() {
     const submitBtn = document.getElementById('submit-score-btn');
     const name = nameInput.value.trim() || '익명';
     
-    isSaving = true;
     const originalBtnText = submitBtn.innerText;
-    submitBtn.innerText = "저장 중...";
-    submitBtn.disabled = true;
 
-    console.log("Saving record for:", name, score, level);
-    
-    // 클라우드 저장 (Firebase)
-    if (window.db && window.fb_addDoc) {
-        try {
-            await window.fb_addDoc(window.fb_collection(window.db, 'rankings'), {
-                name: name,
-                score: score,
-                level: level,
-                timestamp: window.fb_serverTimestamp()
-            });
-            console.log("Cloud Score Saved (v12)");
-            alert("기록이 성공적으로 저장되었습니다!");
-        } catch (error) {
-            console.error("Cloud Save Failed:", error);
-            alert("클라우드 저장 실패: " + error.message + "\n로컬에 저장합니다.");
+    try {
+        isSaving = true;
+        submitBtn.innerText = "저장 중...";
+        submitBtn.disabled = true;
+
+        console.log("Saving record for:", name, score, level);
+        
+        // 클라우드 저장 (Firebase)
+        if (window.db && window.fb_addDoc) {
+            try {
+                await window.fb_addDoc(window.fb_collection(window.db, 'rankings'), {
+                    name: name,
+                    score: score,
+                    level: level,
+                    timestamp: window.fb_serverTimestamp ? window.fb_serverTimestamp() : new Date()
+                });
+                console.log("Cloud Score Saved (v12)");
+                alert("기록이 성공적으로 저장되었습니다!");
+            } catch (error) {
+                console.error("Cloud Save Failed:", error);
+                alert("클라우드 저장 실패: " + error.message + "\n로컬에 저장합니다.");
+                saveLocalScore(name, score, level);
+            }
+        } else {
+            console.warn("Firebase not initialized, using local fallback");
             saveLocalScore(name, score, level);
         }
-    } else {
-        // 로컬 저장소 백업
-        saveLocalScore(name, score, level);
+        
+        // 저장 후 입력창 숨기기
+        document.getElementById('rank-input-area').style.display = 'none';
+        await showHighScores();
+    } catch (globalError) {
+        console.error("Unexpected error in updateRankings:", globalError);
+        alert("알 수 없는 오류가 발생했습니다: " + globalError.message);
+    } finally {
+        // 무조건 상태 복구
+        isSaving = false;
+        submitBtn.innerText = originalBtnText;
+        submitBtn.disabled = false;
     }
-    
-    // 저장 완료 후 상태 복구
-    isSaving = false;
-    submitBtn.innerText = originalBtnText;
-    submitBtn.disabled = false;
-    
-    // 저장 후 입력창 숨기기
-    document.getElementById('rank-input-area').style.display = 'none';
-    await showHighScores();
 }
 
 /**

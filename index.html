@@ -23,18 +23,23 @@
         };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const db = getFirestore(app);
+        try {
+            const app = initializeApp(firebaseConfig);
+            const analytics = getAnalytics(app);
+            const db = getFirestore(app);
 
-        // Global export for game.js compatibility
-        window.db = db;
-        window.fb_collection = collection;
-        window.fb_addDoc = addDoc;
-        window.fb_getDocs = getDocs;
-        window.fb_serverTimestamp = serverTimestamp;
-        
-        console.log("Firebase v12 Modular Enabled");
+            // Global export for game.js compatibility
+            window.db = db;
+            window.fb_collection = collection;
+            window.fb_addDoc = addDoc;
+            window.fb_getDocs = getDocs;
+            window.fb_serverTimestamp = serverTimestamp;
+            
+            console.log("Firebase v12 Modular Enabled & Initialized");
+        } catch (initError) {
+            console.error("Firebase Initialization Failed:", initError);
+            window.firebaseInitError = initError.message;
+        }
     </script>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
