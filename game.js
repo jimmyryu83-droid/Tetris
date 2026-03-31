@@ -43,6 +43,7 @@ let level = 1;
 let combo = 0;
 let gameOver = false;
 let paused = false;
+let gameStarted = false;
 
 // 파티클 시스템 (Particle System)
 let particles = [];
@@ -646,11 +647,24 @@ let dropCounter = 0;
 let lastTime = 0;
 
 /**
+ * 게임 시작 (최초 실행)
+ * Start game
+ */
+function startGame() {
+    if (gameStarted) return;
+    gameStarted = true;
+    document.getElementById('start-screen').classList.add('hidden');
+    playerReset();
+    updateScore();
+    update();
+}
+
+/**
  * 메인 게임 루프
  * Main game loop
  */
 function update(time = 0) {
-    if (gameOver || paused) return;
+    if (gameOver || paused || !gameStarted) return;
 
     const deltaTime = time - lastTime;
     lastTime = time;
@@ -668,6 +682,13 @@ function update(time = 0) {
 
 // 키보드 이벤트 리스너 (Keyboard Controls)
 document.addEventListener('keydown', event => {
+    if (!gameStarted) {
+        if (event.key === 's' || event.key === 'S') {
+            startGame();
+        }
+        return;
+    }
+
     if (gameOver) {
         if (event.key === 'r' || event.key === 'R') {
             restartGame();
@@ -702,8 +723,9 @@ document.addEventListener('keydown', event => {
 });
 
 // 시작
+document.getElementById('start-btn').addEventListener('click', startGame);
 document.getElementById('restart-btn').addEventListener('click', restartGame);
 document.getElementById('submit-score-btn').addEventListener('click', updateRankings);
-playerReset();
+// 초기 화면 렌더링을 위해 draw 한 번 실행
+draw();
 updateScore();
-update();

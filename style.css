@@ -200,6 +200,18 @@ button:hover {
     box-shadow: 0 0 20px var(--neon-blue);
 }
 
+button.primary-btn {
+    border-width: 2px;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 15px 40px;
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+}
+
+button.primary-btn:hover {
+    box-shadow: 0 0 30px var(--neon-blue);
+}
+
 .controls-guide {
     padding: 20px;
 }
