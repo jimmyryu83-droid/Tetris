@@ -92,6 +92,14 @@ body {
     border-radius: 12px;
 }
 
+#tetris-board {
+    display: block;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    max-width: 100%;
+    height: auto;
+}
+
 .overlay {
     position: absolute;
     top: 0;
@@ -432,13 +440,13 @@ button.primary-btn:hover {
         align-items: center;
         justify-content: center;
         padding: 5px;
-        margin: 10px 0;
+        margin: 5px 0;
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid var(--neon-blue);
         box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
         border-radius: 12px;
         max-height: 52vh;
-        width: min-content;
+        width: fit-content;
     }
 
     #tetris-board {

@@ -187,10 +187,11 @@ function draw() {
 
     drawMatrix(board, { x: 0, y: 0 });
     
-    // 고스트 피스 그리기 (Draw Ghost Piece)
-    drawGhost();
-    
-    drawMatrix(player.matrix, player.pos);
+    if (player.matrix) {
+        // 고스트 피스 그리기 (Draw Ghost Piece)
+        drawGhost();
+        drawMatrix(player.matrix, player.pos);
+    }
     
     // 파티클 그리기 (Draw Particles)
     updateParticles();
