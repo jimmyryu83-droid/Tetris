@@ -122,19 +122,31 @@ body {
 }
 
 .overlay-content {
-    padding: 20px;
+    padding: 5vh 20px;
     text-align: center;
     width: 90%;
     max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2vh;
 }
 
 .overlay-content h1 {
-    font-size: 2.2rem;
-    margin-bottom: 10px;
+    font-size: min(2.5rem, 8vh);
+    margin-bottom: 0.5vh;
     background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+    line-height: 1.2;
+}
+
+.overlay-content p {
+    font-size: min(1rem, 3vh);
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 1vh;
 }
 
 .input-group {
@@ -212,12 +224,12 @@ button:hover {
 button.primary-btn {
     border-width: 2px;
     font-weight: 700;
-    font-size: 1.1rem;
-    padding: 12px 25px;
+    font-size: min(1.1rem, 4vh);
+    padding: min(12px, 2vh) 25px;
     box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
     white-space: nowrap; /* 한 줄 유지 */
     width: auto;
-    min-width: 200px;
+    min-width: 180px;
 }
 
 button.primary-btn:hover {
