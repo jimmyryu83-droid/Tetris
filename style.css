@@ -24,9 +24,11 @@ body {
     color: var(--text-color);
     height: 100vh;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     overflow: hidden;
+    touch-action: none; /* 브라우저 스크롤/줌 방지 */
 }
 
 .game-container {
@@ -99,13 +101,14 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.85); /* 더 어둡게 */
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 10;
+    z-index: 1000; /* 확실한 우선순위 */
     border-radius: 16px;
     transition: opacity 0.3s ease;
+    backdrop-filter: blur(8px);
 }
 
 .overlay.hidden {
@@ -238,110 +241,229 @@ button.primary-btn:hover {
     font-weight: 600;
 }
 
+.mobile-header {
+    display: none;
+    width: 100%;
+    padding: 10px 20px;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    z-index: 100;
+    border-radius: 0 0 16px 16px;
+    margin-bottom: 0;
+}
+
+.header-stat {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-stat span {
+    color: var(--neon-blue);
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+#m-next-piece {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
 /* 모바일 전용 스타일 (Mobile Styles) */
 .mobile-controls {
     display: none;
-    flex-direction: column;
-    gap: 10px;
-    padding: 20px;
-    width: 100%;
-    max-width: 400px;
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    padding: 0 20px;
+    z-index: 100;
+    pointer-events: none; /* 배경 클릭 관통 */
 }
 
 .control-row {
     display: flex;
-    justify-content: center;
-    gap: 10px;
+    justify-content: space-between;
+    align-items: flex-end;
     width: 100%;
+    pointer-events: auto;
 }
 
 .main-ctrls {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-end;
 }
 
-.center-ctrls {
-    display: flex;
-    flex-direction: column;
+.d-pad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
     gap: 10px;
 }
 
+.action-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-end;
+}
+
 .ctrl-btn {
-    width: 70px;
-    height: 70px;
+    width: 65px;
+    height: 65px;
     padding: 0;
     margin: 0;
     border-radius: 50%;
-    font-size: 0.9rem;
+    font-size: 1.2rem;
     font-weight: 700;
     display: flex;
     justify-content: center;
     align-items: center;
     user-select: none;
     touch-action: manipulation;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    color: var(--text-color);
 }
 
-#btn-left, #btn-right {
-    width: 80px;
-    height: 80px;
+.ctrl-btn:active {
+    background: var(--neon-blue);
+    color: var(--bg-color);
+    transform: scale(0.95);
 }
+
+#btn-pause {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    font-size: 0.7rem;
+}
+
+#btn-up { grid-column: 2; }
+#btn-left { grid-row: 2; grid-column: 1; }
+#btn-down { grid-row: 2; grid-column: 2; }
+#btn-right { grid-row: 2; grid-column: 3; }
 
 #btn-hard {
+    width: 80px;
+    height: 80px;
     border-color: var(--neon-pink);
     color: var(--neon-pink);
+    font-size: 0.9rem;
 }
 
 @media (max-width: 800px) {
+    html, body {
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        position: fixed; /* 바운스 스크롤 방지 */
+    }
+
     body {
+        padding: 0;
+        display: flex;
         flex-direction: column;
-        overflow-y: auto;
-        padding: 20px 0;
-        height: auto;
+        justify-content: space-between;
+    }
+
+    .mobile-header {
+        display: flex;
+        height: 60px;
+        flex-shrink: 0;
+        position: relative;
+        top: 0;
+        background: rgba(11, 14, 20, 0.8);
     }
 
     .game-container {
+        flex: 1;
+        width: 100%;
+        display: flex;
         flex-direction: column;
+        justify-content: center;
         align-items: center;
-        gap: 15px;
+        overflow: hidden;
+        margin: 0;
+        position: relative;
     }
 
     .side-panel {
-        flex-direction: row;
-        width: 100%;
-        justify-content: center;
-    }
-
-    .stat-box {
-        padding: 10px;
-        min-width: 100px;
-    }
-
-    .stat-box h2 {
-        font-size: 0.7rem;
-    }
-
-    .stat-box div, #final-score {
-        font-size: 1.5rem;
-    }
-
-    .desktop-only {
         display: none;
     }
 
-    .mobile-controls {
+    .board-container {
+        flex: 1;
         display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        margin: 0;
+        background: transparent;
+        box-shadow: none;
+        border: none;
+        max-height: 50vh; /* 보드가 너무 커지지 않게 제한 */
     }
 
-    .board-container {
-        transform: scale(0.9);
+    #tetris-board {
+        max-height: 100%;
+        max-width: 100%;
+        height: auto;
+        width: auto;
+        aspect-ratio: 10 / 20;
+    }
+
+    .mobile-controls {
+        display: block;
+        height: 220px;
+        flex-shrink: 0;
+        position: relative;
+        bottom: 0;
+        padding: 10px 20px;
+        background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+    }
+
+    #btn-pause {
+        position: absolute;
+        top: -60px;
+        right: 20px;
+        z-index: 110;
+    }
+
+    .ctrl-btn {
+        width: 60px;
+        height: 60px;
+    }
+
+    #btn-hard {
+        width: 75px;
+        height: 75px;
     }
 }
 
-@media (max-height: 800px) and (max-width: 800px) {
+@media (max-height: 650px) {
+    .mobile-controls {
+        height: 180px;
+    }
+    .ctrl-btn {
+        width: 50px;
+        height: 50px;
+    }
+    #btn-hard {
+        width: 65px;
+        height: 65px;
+    }
     .board-container {
-        transform: scale(0.8);
-        margin: -40px 0;
+        max-height: 40vh;
     }
 }
 

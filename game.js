@@ -7,6 +7,8 @@ const canvas = document.getElementById('tetris-board');
 const context = canvas.getContext('2d');
 const nextCanvas = document.getElementById('next-piece');
 const nextContext = nextCanvas.getContext('2d');
+const mNextCanvas = document.getElementById('m-next-piece');
+const mNextContext = mNextCanvas ? mNextCanvas.getContext('2d') : null;
 
 const COLS = 10;
 const ROWS = 20;
@@ -196,6 +198,36 @@ function draw() {
     context.restore();
     
     drawNext();
+    if (mNextContext) drawNextMobile();
+}
+
+/**
+ * 모바일 다음 블록 미리보기 렌더링
+ * Draw next piece preview for mobile
+ */
+function drawNextMobile() {
+    mNextContext.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    mNextContext.fillRect(0, 0, mNextCanvas.width, mNextCanvas.height);
+    
+    if (player.next) {
+        // 모바일 헤더용 작은 크기로 렌더링
+        const size = 8; // 작은 블록 크기
+        const offset = {
+            x: (mNextCanvas.width / size - player.next[0].length) / 2,
+            y: (mNextCanvas.height / size - player.next.length) / 2
+        };
+        
+        player.next.forEach((row, y) => {
+            row.forEach((value, x) => {
+                if (value !== 0) {
+                    const px = (x + offset.x) * size;
+                    const py = (y + offset.y) * size;
+                    mNextContext.fillStyle = COLORS[value];
+                    mNextContext.fillRect(px + 1, py + 1, size - 1, size - 1);
+                }
+            });
+        });
+    }
 }
 
 /**
@@ -533,10 +565,6 @@ function checkLevelUp() {
     }
 }
 
-/**
- * 점수 및 레벨 UI 업데이트
- * Update score and level UI
- */
 function updateScore() {
     document.getElementById('score').innerText = score.toLocaleString();
     document.getElementById('level').innerText = level;
@@ -553,6 +581,18 @@ function updateScore() {
         linesElement.innerText = '';
         linesElement.parentElement.style.opacity = '0';
     }
+
+    updateMobileStats();
+}
+
+/**
+ * 모바일 헤더 정보 업데이트
+ */
+function updateMobileStats() {
+    const mLevel = document.getElementById('m-level');
+    const mScore = document.getElementById('m-score');
+    if (mLevel) mLevel.innerText = level;
+    if (mScore) mScore.innerText = score.toLocaleString();
 }
 
 /**
@@ -744,8 +784,15 @@ const addTouchListener = (id, action) => {
         if (navigator.vibrate) navigator.vibrate(20);
     };
 
-    btn.addEventListener('touchstart', handler);
-    btn.addEventListener('mousedown', handler); // 마우스 클릭도 지원 (테스트용)
+    btn.addEventListener('touchstart', handler, { passive: false });
+    // mousedown은 데스크톱에서도 작동하게 함
+    btn.addEventListener('mousedown', (e) => {
+        if (!gameStarted || gameOver || paused) {
+            if (id === 'btn-pause' && gameStarted && !gameOver) togglePause();
+            return;
+        }
+        action();
+    });
 };
 
 addTouchListener('btn-left', () => playerMove(-1));

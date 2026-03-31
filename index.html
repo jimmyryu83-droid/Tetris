@@ -2,12 +2,19 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Premium Tetris - 네온 에디션</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="mobile-header glass">
+        <div class="header-stat">LV <span id="m-level">1</span></div>
+        <div class="header-stat">SCORE <span id="m-score">0</span></div>
+        <div class="header-stat">NEXT
+            <canvas id="m-next-piece" width="40" height="40"></canvas>
+        </div>
+    </div>
     <div class="game-container">
         <div class="side-panel left">
             <div class="stat-box glass">
@@ -81,19 +88,17 @@
 
     <!-- 모바일 전용 컨트롤러 (Mobile Only Controls) -->
     <div class="mobile-controls">
+        <button id="btn-pause" class="ctrl-btn glass">PAUSE</button>
         <div class="control-row">
-            <button id="btn-pause" class="ctrl-btn glass">PAUSE</button>
-        </div>
-        <div class="control-row">
-            <button id="btn-up" class="ctrl-btn glass">ROTATE</button>
-        </div>
-        <div class="control-row main-ctrls">
-            <button id="btn-left" class="ctrl-btn glass">←</button>
-            <div class="center-ctrls">
-                <button id="btn-down" class="ctrl-btn glass">↓</button>
-                <button id="btn-hard" class="ctrl-btn glass">DROP</button>
+            <div class="d-pad">
+                <button id="btn-up" class="ctrl-btn">↻</button>
+                <button id="btn-left" class="ctrl-btn">←</button>
+                <button id="btn-down" class="ctrl-btn">↓</button>
+                <button id="btn-right" class="ctrl-btn">→</button>
             </div>
-            <button id="btn-right" class="ctrl-btn glass">→</button>
+            <div class="action-btns">
+                <button id="btn-hard" class="ctrl-btn">DROP</button>
+            </div>
         </div>
     </div>
 
