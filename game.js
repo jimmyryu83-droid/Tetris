@@ -590,9 +590,20 @@ function updateMobileStats() {
     const mLevel = document.getElementById('m-level');
     const mScore = document.getElementById('m-score');
     const mLines = document.getElementById('m-lines');
+    
     if (mLevel) mLevel.innerText = level;
     if (mScore) mScore.innerText = score.toLocaleString();
-    if (mLines) mLines.innerText = lines;
+    
+    if (mLines) {
+        const linesRemaining = linesPerLevel - (lines % linesPerLevel);
+        if (linesRemaining <= 5) {
+            mLines.innerText = linesRemaining;
+            mLines.parentElement.style.opacity = '1';
+        } else {
+            mLines.innerText = '';
+            mLines.parentElement.style.opacity = '0';
+        }
+    }
 }
 
 /**
