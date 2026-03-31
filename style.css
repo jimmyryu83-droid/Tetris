@@ -255,16 +255,33 @@ body {
     .rank-level {
         display: none;
     }
+    .score-item {
+        padding: 1vh 0;
+        gap: 8px;
+        flex-wrap: nowrap; /* 절대 줄바꿈 방지 */
+    }
     .rank-name {
         flex: 1;
-        font-size: 0.95rem;
+        min-width: 0; /* ellipsis 작동을 위한 필수 설정 */
+        font-size: clamp(0.75rem, 4.5vw, 0.95rem);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .rank-score {
-        flex: 1;
-        font-size: 0.95rem;
+        flex: 0 0 auto; /* 점수는 가로 공간을 고정적으로 차지 (잘리지 않게) */
+        font-size: clamp(0.75rem, 4.5vw, 0.95rem);
+        text-align: right;
+    }
+}
+
+/* 초소형 휴대폰 대응 (Extra Small Devices) */
+@media (max-width: 340px) {
+    .high-scores-list {
+        padding: 10px;
     }
     .score-item {
-        padding: 10px 0;
+        gap: 5px;
     }
 }
 
