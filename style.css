@@ -122,9 +122,10 @@ body {
 }
 
 .overlay-content {
-    padding: 40px;
+    padding: 20px;
     text-align: center;
-    min-width: 240px;
+    width: 90%;
+    max-width: 320px;
 }
 
 .overlay-content h1 {
@@ -211,9 +212,12 @@ button:hover {
 button.primary-btn {
     border-width: 2px;
     font-weight: 700;
-    font-size: 1.2rem;
-    padding: 15px 40px;
+    font-size: 1.1rem;
+    padding: 12px 25px;
     box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+    white-space: nowrap; /* 한 줄 유지 */
+    width: auto;
+    min-width: 200px;
 }
 
 button.primary-btn:hover {
