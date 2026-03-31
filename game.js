@@ -628,15 +628,16 @@ async function updateRankings() {
     const name = nameInput.value.trim() || '익명';
     const originalBtnText = submitBtn.innerText;
 
-    // Failsafe: 10초 후 무조건 버튼 복구
+    // Failsafe: 5초 후 무조건 버튼 복구
     const failsafe = setTimeout(() => {
         if (isSaving) {
             isSaving = false;
             submitBtn.innerText = originalBtnText;
             submitBtn.disabled = false;
-            console.warn("Failsafe triggered - Ranking save timed out");
+            console.warn("Failsafe triggered - Ranking save timed out (5s)");
+            alert("저장 시간이 초과되었습니다. 네트워크 상태나 Firebase 설정을 확인해 주세요.");
         }
-    }, 10000);
+    }, 5000);
 
     try {
         isSaving = true;

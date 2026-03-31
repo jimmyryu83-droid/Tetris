@@ -36,8 +36,10 @@
             window.fb_serverTimestamp = serverTimestamp;
             
             console.log("Firebase v12 Modular Enabled & Initialized");
+            // alert("클라우드 서버 연결 성공!"); // 최초 로딩 시 확인용
         } catch (initError) {
             console.error("Firebase Initialization Failed:", initError);
+            alert("Firebase 초기화 실패: " + initError.message);
             window.firebaseInitError = initError.message;
         }
     </script>
