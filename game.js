@@ -635,15 +635,15 @@ async function updateRankings() {
     console.log("Saving record for:", name, score, level);
     
     // 클라우드 저장 (Firebase)
-    if (window.db) {
+    if (window.db && window.fb_addDoc) {
         try {
-            await window.db.collection('rankings').add({
+            await window.fb_addDoc(window.fb_collection(window.db, 'rankings'), {
                 name: name,
                 score: score,
                 level: level,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                timestamp: window.fb_serverTimestamp()
             });
-            console.log("Cloud Score Saved");
+            console.log("Cloud Score Saved (v12)");
             alert("기록이 성공적으로 저장되었습니다!");
         } catch (error) {
             console.error("Cloud Save Failed:", error);
@@ -685,18 +685,15 @@ async function showHighScores() {
     let rankings = [];
 
     // 클라우드에서 데이터 가져오기 시도
-    if (window.db) {
+    if (window.db && window.fb_getDocs) {
         try {
             // 인덱스 문제 방지를 위해 정렬 없이 가져온 후 클라이언트에서 정렬
-            const snapshot = await window.db.collection('rankings')
-                .limit(50) // 일단 넉넉히 가져옴
-                .get();
+            const snapshot = await window.fb_getDocs(window.fb_collection(window.db, 'rankings'));
             rankings = snapshot.docs.map(doc => doc.data());
             rankings.sort((a, b) => (b.score || 0) - (a.score || 0));
             rankings = rankings.slice(0, 10);
         } catch (error) {
             console.error("Cloud Fetch Failed:", error);
-            // alert("랭킹 불러오기 실패: " + error.message); // 너무 자주 뜨면 불편하므로 생략하거나 콘솔로그만
             rankings = JSON.parse(localStorage.getItem(RANK_KEY) || '[]');
         }
     } else {

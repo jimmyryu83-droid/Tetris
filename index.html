@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>NEON TETRIS - Mobile Optimized</title>
     
-    <!-- Firebase SDK (v9 compat) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-    
-    <script>
-        // Firebase Configuration (User Provided)
+    <!-- Firebase SDK (v12.11.0 Modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
+        import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
         const firebaseConfig = {
           apiKey: "AIzaSyDqCBIQCpQMTk99TCamJ-knayZdOnzK-SU",
           authDomain: "top10-ranking-tetris.firebaseapp.com",
@@ -20,15 +21,20 @@
           appId: "1:475960442692:web:bd814dfb961c329ad4a111",
           measurementId: "G-Y0SGH98841"
         };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+
+        // Global export for game.js compatibility
+        window.db = db;
+        window.fb_collection = collection;
+        window.fb_addDoc = addDoc;
+        window.fb_getDocs = getDocs;
+        window.fb_serverTimestamp = serverTimestamp;
         
-        // Firebase 초기화 (config가 유효할 때만)
-        if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
-            firebase.initializeApp(firebaseConfig);
-            window.db = firebase.firestore();
-            console.log("Firebase Cloud Ranking Enabled");
-        } else {
-            console.warn("Firebase Config not set - Using Local Ranking as fallback");
-        }
+        console.log("Firebase v12 Modular Enabled");
     </script>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -134,6 +140,6 @@
         </div>
     </div>
 
-    <script src="game.js"></script>
+    <script src="game.js" defer></script>
 </body>
 </html>
