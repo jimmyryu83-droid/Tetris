@@ -122,15 +122,15 @@ body {
 }
 
 .overlay-content {
-    padding: 5vh 20px;
+    padding: 3vh 20px;
     text-align: center;
     width: 90%;
-    max-width: 320px;
+    max-width: 360px; /* 조금 더 넓게 조정 */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 2vh;
+    gap: 1.5vh;
 }
 
 .overlay-content h1 {
@@ -150,55 +150,111 @@ body {
 }
 
 .input-group {
-    margin: 20px 0;
     display: flex;
     gap: 10px;
-    justify-content: center;
+    margin: 15px 0;
+    width: 100%;
 }
 
 #player-name {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid var(--glass-border);
-    color: white;
-    padding: 10px;
+    flex: 1;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--neon-blue);
     border-radius: 8px;
+    color: white;
+    font-family: inherit;
     outline: none;
-    width: 150px;
+    transition: all 0.3s ease;
 }
 
 #player-name:focus {
-    border-color: var(--neon-blue);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+}
+
+#submit-score-btn {
+    padding: 10px 20px;
+    background: var(--neon-blue);
+    border: none;
+    color: #0b0e14;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#submit-score-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px var(--neon-blue);
 }
 
 .high-scores-list {
-    margin: 20px 0;
-    text-align: left;
-    max-height: 200px;
-    overflow-y: auto;
+    width: 100%;
+    margin-top: 10px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .high-scores-list h3 {
     font-size: 0.9rem;
-    color: var(--neon-blue);
-    text-align: center;
+    color: var(--neon-purple);
     margin-bottom: 10px;
+    letter-spacing: 2px;
 }
 
-#score-list {
+.score-list-container {
     list-style: none;
-    font-size: 0.8rem;
+    padding: 0;
+    margin: 0;
+    font-size: 0.85rem;
 }
 
-#score-list li {
+.score-item {
     display: flex;
     justify-content: space-between;
-    padding: 5px 10px;
+    align-items: center;
+    padding: 8px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-#score-list li:first-child {
+.score-item:first-child .rank-name {
     color: #ffd700;
     font-weight: 700;
+}
+
+.rank-name {
+    flex: 2;
+    text-align: left;
+    color: white;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rank-level {
+    flex: 1;
+    text-align: center;
+    color: var(--neon-blue);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.rank-score {
+    flex: 2;
+    text-align: right;
+    color: var(--neon-pink);
+    font-weight: 700;
+}
+
+.start-rankings {
+    max-height: 25vh;
+    overflow-y: auto;
+    margin-top: 10px;
+    width: 100%;
 }
 
 button {
@@ -486,10 +542,22 @@ button.primary-btn:hover {
         background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
     }
 
-    #btn-pause {
-        position: static;
-        width: 35px;
-        height: 35px;
+    .input-group {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    #player-name {
+        width: 100%;
+        font-size: 0.9rem;
+    }
+
+    #submit-score-btn {
+        width: 100%;
+    }
+
+    .score-item {
+        font-size: 0.75rem;
     }
 
     .ctrl-btn {

@@ -642,19 +642,34 @@ function updateRankings() {
  * Display rankings
  */
 function showHighScores() {
+    const containers = document.querySelectorAll('.score-list-container');
     const rankings = JSON.parse(localStorage.getItem(RANK_KEY) || '[]');
-    const list = document.getElementById('score-list');
-    list.innerHTML = '';
     
-    rankings.forEach((entry, index) => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-            <span>${index + 1}. ${entry.name}</span>
-            <span>LV.${entry.level} - ${entry.score.toLocaleString()}</span>
-        `;
-        list.appendChild(li);
+    // 랭킹 보여주기
+    containers.forEach(container => {
+        container.innerHTML = '';
+        if (rankings.length === 0) {
+            container.innerHTML = '<li class="score-item" style="justify-content:center; color:rgba(255,255,255,0.3);">아직 기록이 없습니다</li>';
+            return;
+        }
+
+        rankings.forEach((entry, index) => {
+            const li = document.createElement('li');
+            li.classList.add('score-item');
+            
+            // 이름과 점수, 레벨을 한 줄에 표시하는 구조
+            li.innerHTML = `
+                <span class="rank-name">${index + 1}. ${entry.name}</span>
+                <span class="rank-level">LV.${entry.level || 1}</span>
+                <span class="rank-score">${entry.score.toLocaleString()}</span>
+            `;
+            container.appendChild(li);
+        });
     });
 }
+
+// 초기 로딩 시 랭킹 표시 (시작 화면용)
+showHighScores();
 
 /**
  * 게임 재시작
