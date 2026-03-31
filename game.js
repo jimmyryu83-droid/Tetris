@@ -631,8 +631,10 @@ async function updateRankings() {
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             console.log("Cloud Score Saved");
+            alert("기록이 성공적으로 저장되었습니다!");
         } catch (error) {
-            console.error("Cloud Save Failed, using Local:", error);
+            console.error("Cloud Save Failed:", error);
+            alert("클라우드 저장 실패: " + error.message + "\n로컬에 저장합니다.");
             saveLocalScore(name, score, level);
         }
     } else {
@@ -667,13 +669,16 @@ async function showHighScores() {
     // 클라우드에서 데이터 가져오기 시도
     if (window.db) {
         try {
+            // 인덱스 문제 방지를 위해 정렬 없이 가져온 후 클라이언트에서 정렬
             const snapshot = await window.db.collection('rankings')
-                .orderBy('score', 'desc')
-                .limit(10)
+                .limit(50) // 일단 넉넉히 가져옴
                 .get();
             rankings = snapshot.docs.map(doc => doc.data());
+            rankings.sort((a, b) => (b.score || 0) - (a.score || 0));
+            rankings = rankings.slice(0, 10);
         } catch (error) {
-            console.error("Cloud Fetch Failed, using Local:", error);
+            console.error("Cloud Fetch Failed:", error);
+            // alert("랭킹 불러오기 실패: " + error.message); // 너무 자주 뜨면 불편하므로 생략하거나 콘솔로그만
             rankings = JSON.parse(localStorage.getItem(RANK_KEY) || '[]');
         }
     } else {
