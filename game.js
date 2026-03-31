@@ -618,19 +618,27 @@ function handleGameOver() {
     showHighScores();
 }
 
-/**
- * 랭킹 데이터 저장 및 업데이트
- * Update rankings in localStorage
- */
-function updateRankings() {
+async function updateRankings() {
     const name = document.getElementById('player-name').value.trim() || '익명';
-    const rankings = JSON.parse(localStorage.getItem(RANK_KEY) || '[]');
     
-    rankings.push({ name, score, level });
-    rankings.sort((a, b) => b.score - a.score); // 점수 내림차순 정렬
-    const top10 = rankings.slice(0, 10);
-    
-    localStorage.setItem(RANK_KEY, JSON.stringify(top10));
+    // 클라우드 저장 (Firebase)
+    if (window.db) {
+        try {
+            await window.db.collection('rankings').add({
+                name: name,
+                score: score,
+                level: level,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            console.log("Cloud Score Saved");
+        } catch (error) {
+            console.error("Cloud Save Failed, using Local:", error);
+            saveLocalScore(name, score, level);
+        }
+    } else {
+        // 로컬 저장소 백업
+        saveLocalScore(name, score, level);
+    }
     
     // 저장 후 입력창 숨기기
     document.getElementById('rank-input-area').style.display = 'none';
@@ -638,14 +646,41 @@ function updateRankings() {
 }
 
 /**
+ * 로컬 저장소에 점수 저장 (Fallback)
+ */
+function saveLocalScore(name, score, level) {
+    const rankings = JSON.parse(localStorage.getItem(RANK_KEY) || '[]');
+    rankings.push({ name, score, level });
+    rankings.sort((a, b) => b.score - a.score);
+    const top10 = rankings.slice(0, 10);
+    localStorage.setItem(RANK_KEY, JSON.stringify(top10));
+}
+
+/**
  * 랭킹 목록 표시
  * Display rankings
  */
-function showHighScores() {
+async function showHighScores() {
     const containers = document.querySelectorAll('.score-list-container');
-    const rankings = JSON.parse(localStorage.getItem(RANK_KEY) || '[]');
+    let rankings = [];
+
+    // 클라우드에서 데이터 가져오기 시도
+    if (window.db) {
+        try {
+            const snapshot = await window.db.collection('rankings')
+                .orderBy('score', 'desc')
+                .limit(10)
+                .get();
+            rankings = snapshot.docs.map(doc => doc.data());
+        } catch (error) {
+            console.error("Cloud Fetch Failed, using Local:", error);
+            rankings = JSON.parse(localStorage.getItem(RANK_KEY) || '[]');
+        }
+    } else {
+        rankings = JSON.parse(localStorage.getItem(RANK_KEY) || '[]');
+    }
     
-    // 랭킹 보여주기
+    // 랭킹 리스트 렌더링
     containers.forEach(container => {
         container.innerHTML = '';
         if (rankings.length === 0) {
@@ -656,8 +691,6 @@ function showHighScores() {
         rankings.forEach((entry, index) => {
             const li = document.createElement('li');
             li.classList.add('score-item');
-            
-            // 이름과 점수, 레벨을 한 줄에 표시하는 구조
             li.innerHTML = `
                 <span class="rank-name">${index + 1}. ${entry.name}</span>
                 <span class="rank-level">LV.${entry.level || 1}</span>
