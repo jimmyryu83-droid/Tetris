@@ -122,15 +122,18 @@ body {
 }
 
 .overlay-content {
-    padding: 3vh 20px;
+    padding: 2vh 15px;
     text-align: center;
-    width: 90%;
-    max-width: 360px; /* 조금 더 넓게 조정 */
+    width: 95%;
+    max-width: 380px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start; /* 상단부터 채우기 */
     align-items: center;
-    gap: 1.5vh;
+    gap: 1.2vh;
+    max-height: 95vh; /* 화면을 넘지 않도록 */
+    overflow-y: auto; /* 내용이 많으면 스크롤 */
+    -webkit-overflow-scrolling: touch;
 }
 
 .overlay-content h1 {
@@ -261,16 +264,17 @@ body {
         flex-wrap: nowrap; /* 절대 줄바꿈 방지 */
     }
     .rank-name {
-        flex: 1;
-        min-width: 0; /* ellipsis 작동을 위한 필수 설정 */
-        font-size: clamp(0.75rem, 4.5vw, 0.95rem);
+        flex: 1.8; /* 이름 공간을 더 확보 */
+        min-width: 0;
+        font-size: clamp(0.8rem, 4vw, 1rem); 
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
     .rank-score {
-        flex: 0 0 auto; /* 점수는 가로 공간을 고정적으로 차지 (잘리지 않게) */
-        font-size: clamp(0.75rem, 4.5vw, 0.95rem);
+        flex: 1; /* 점수는 성격에 맞게 flex 조절 */
+        min-width: 80px; /* 최소 너비 확보로 1-2글자 제한 방지 */
+        font-size: clamp(0.8rem, 4vw, 1rem);
         text-align: right;
     }
 }

@@ -616,6 +616,15 @@ function handleGameOver() {
     document.getElementById('game-over').classList.remove('hidden');
     document.getElementById('rank-input-area').style.display = 'flex';
     showHighScores();
+    
+    // 모바일 포커스 지원 (Auto-focus on mobile)
+    setTimeout(() => {
+        const nameInput = document.getElementById('player-name');
+        if (nameInput) {
+            nameInput.focus();
+            nameInput.click(); // 일부 브라우저 대응
+        }
+    }, 500);
 }
 
 let isSaving = false;
