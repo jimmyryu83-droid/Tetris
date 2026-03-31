@@ -188,8 +188,6 @@ function draw() {
     drawMatrix(board, { x: 0, y: 0 });
     
     if (player.matrix) {
-        // 고스트 피스 그리기 (Draw Ghost Piece)
-        drawGhost();
         drawMatrix(player.matrix, player.pos);
     }
     
@@ -305,36 +303,6 @@ function drawCombo() {
     }
 }
 
-/**
- * 고스트 피스 렌더링 (어디 떨어질지 미리 보기)
- */
-function drawGhost() {
-    if (!player.matrix) return;
-    
-    const ghostPos = { x: player.pos.x, y: player.pos.y };
-    while (!collide(board, { matrix: player.matrix, pos: ghostPos })) {
-        ghostPos.y++;
-    }
-    ghostPos.y--;
-    
-    // 투명한 블록으로 그리기
-    player.matrix.forEach((row, y) => {
-        row.forEach((value, x) => {
-            if (value !== 0) {
-                const px = (x + ghostPos.x) * BLOCK_SIZE;
-                const py = (y + ghostPos.y) * BLOCK_SIZE;
-                
-                context.strokeStyle = COLORS[value];
-                context.lineWidth = 2;
-                context.strokeRect(px + 2, py + 2, BLOCK_SIZE - 4, BLOCK_SIZE - 4);
-                context.lineWidth = 1;
-                
-                context.fillStyle = 'rgba(255, 255, 255, 0.1)';
-                context.fillRect(px + 2, py + 2, BLOCK_SIZE - 4, BLOCK_SIZE - 4);
-            }
-        });
-    });
-}
 function drawNext() {
     nextContext.fillStyle = 'rgba(11, 14, 20, 0.8)';
     nextContext.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
