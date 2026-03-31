@@ -618,12 +618,21 @@ function handleGameOver() {
     showHighScores();
 }
 
+let isSaving = false;
+
 async function updateRankings() {
+    if (isSaving) return;
+    
     const nameInput = document.getElementById('player-name');
+    const submitBtn = document.getElementById('submit-score-btn');
     const name = nameInput.value.trim() || '익명';
     
+    isSaving = true;
+    const originalBtnText = submitBtn.innerText;
+    submitBtn.innerText = "저장 중...";
+    submitBtn.disabled = true;
+
     console.log("Saving record for:", name, score, level);
-    // alert("등록을 시작합니다: " + name + " (점수: " + score + ")");
     
     // 클라우드 저장 (Firebase)
     if (window.db) {
@@ -646,9 +655,14 @@ async function updateRankings() {
         saveLocalScore(name, score, level);
     }
     
+    // 저장 완료 후 상태 복구
+    isSaving = false;
+    submitBtn.innerText = originalBtnText;
+    submitBtn.disabled = false;
+    
     // 저장 후 입력창 숨기기
     document.getElementById('rank-input-area').style.display = 'none';
-    showHighScores();
+    await showHighScores();
 }
 
 /**
@@ -830,10 +844,29 @@ document.addEventListener('keydown', event => {
     }
 });
 
-// 시작
-document.getElementById('start-btn').addEventListener('click', startGame);
-document.getElementById('restart-btn').addEventListener('click', restartGame);
-document.getElementById('submit-score-btn').addEventListener('click', updateRankings);
+// 시작/저장 버튼들 모바일 대응 (Robust Button Handlers)
+const addOverlayBtnListener = (id, action) => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    
+    const handler = (e) => {
+        // e.preventDefault(); // 입력을 위해 preventDefault는 신중하게 (버튼만)
+        if (e.target === btn || btn.contains(e.target)) {
+            console.log("Overlay Button Pressed:", id);
+            action();
+        }
+    };
+
+    btn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        handler(e);
+    });
+    btn.addEventListener('click', handler);
+};
+
+addOverlayBtnListener('start-btn', startGame);
+addOverlayBtnListener('restart-btn', restartGame);
+addOverlayBtnListener('submit-score-btn', updateRankings);
 
 // 엔터키 지원
 document.getElementById('player-name').addEventListener('keypress', (e) => {
