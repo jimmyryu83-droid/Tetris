@@ -238,6 +238,113 @@ button.primary-btn:hover {
     font-weight: 600;
 }
 
+/* 모바일 전용 스타일 (Mobile Styles) */
+.mobile-controls {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.control-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.main-ctrls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.center-ctrls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ctrl-btn {
+    width: 70px;
+    height: 70px;
+    padding: 0;
+    margin: 0;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    font-weight: 700;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    touch-action: manipulation;
+}
+
+#btn-left, #btn-right {
+    width: 80px;
+    height: 80px;
+}
+
+#btn-hard {
+    border-color: var(--neon-pink);
+    color: var(--neon-pink);
+}
+
+@media (max-width: 800px) {
+    body {
+        flex-direction: column;
+        overflow-y: auto;
+        padding: 20px 0;
+        height: auto;
+    }
+
+    .game-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .side-panel {
+        flex-direction: row;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .stat-box {
+        padding: 10px;
+        min-width: 100px;
+    }
+
+    .stat-box h2 {
+        font-size: 0.7rem;
+    }
+
+    .stat-box div, #final-score {
+        font-size: 1.5rem;
+    }
+
+    .desktop-only {
+        display: none;
+    }
+
+    .mobile-controls {
+        display: flex;
+    }
+
+    .board-container {
+        transform: scale(0.9);
+    }
+}
+
+@media (max-height: 800px) and (max-width: 800px) {
+    .board-container {
+        transform: scale(0.8);
+        margin: -40px 0;
+    }
+}
+
 #next-piece {
     background: rgba(0, 0, 0, 0.2);
     border-radius: 8px;

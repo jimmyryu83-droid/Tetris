@@ -66,7 +66,7 @@
                 <h2>NEXT</h2>
                 <canvas id="next-piece" width="120" height="120"></canvas>
             </div>
-            <div class="controls-guide glass">
+            <div class="controls-guide glass desktop-only">
                 <h3>조작법</h3>
                 <ul>
                     <li><span>← →</span> : 이동</li>
@@ -78,6 +78,25 @@
             </div>
         </div>
     </div>
+
+    <!-- 모바일 전용 컨트롤러 (Mobile Only Controls) -->
+    <div class="mobile-controls">
+        <div class="control-row">
+            <button id="btn-pause" class="ctrl-btn glass">PAUSE</button>
+        </div>
+        <div class="control-row">
+            <button id="btn-up" class="ctrl-btn glass">ROTATE</button>
+        </div>
+        <div class="control-row main-ctrls">
+            <button id="btn-left" class="ctrl-btn glass">←</button>
+            <div class="center-ctrls">
+                <button id="btn-down" class="ctrl-btn glass">↓</button>
+                <button id="btn-hard" class="ctrl-btn glass">DROP</button>
+            </div>
+            <button id="btn-right" class="ctrl-btn glass">→</button>
+        </div>
+    </div>
+
     <script src="game.js"></script>
 </body>
 </html>

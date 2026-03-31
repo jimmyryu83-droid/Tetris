@@ -726,6 +726,35 @@ document.addEventListener('keydown', event => {
 document.getElementById('start-btn').addEventListener('click', startGame);
 document.getElementById('restart-btn').addEventListener('click', restartGame);
 document.getElementById('submit-score-btn').addEventListener('click', updateRankings);
+
+// 모바일 컨트롤 이벤트 (Mobile Control Events)
+const addTouchListener = (id, action) => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    
+    const handler = (e) => {
+        e.preventDefault();
+        if (!gameStarted || gameOver || paused) {
+            if (id === 'btn-pause' && gameStarted && !gameOver) togglePause();
+            return;
+        }
+        action();
+        
+        // 햅틱 피드백 (Vibration)
+        if (navigator.vibrate) navigator.vibrate(20);
+    };
+
+    btn.addEventListener('touchstart', handler);
+    btn.addEventListener('mousedown', handler); // 마우스 클릭도 지원 (테스트용)
+};
+
+addTouchListener('btn-left', () => playerMove(-1));
+addTouchListener('btn-right', () => playerMove(1));
+addTouchListener('btn-up', () => playerRotate(-1));
+addTouchListener('btn-down', () => playerDrop());
+addTouchListener('btn-hard', () => playerHardDrop());
+addTouchListener('btn-pause', () => togglePause());
+
 // 초기 화면 렌더링을 위해 draw 한 번 실행
 draw();
 updateScore();
