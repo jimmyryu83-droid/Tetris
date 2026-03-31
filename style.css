@@ -250,6 +250,24 @@ body {
     font-weight: 700;
 }
 
+/* 모바일 랭킹 최적화 (Mobile Ranking Optimization) */
+@media (max-width: 600px) {
+    .rank-level {
+        display: none;
+    }
+    .rank-name {
+        flex: 1;
+        font-size: 0.95rem;
+    }
+    .rank-score {
+        flex: 1;
+        font-size: 0.95rem;
+    }
+    .score-item {
+        padding: 10px 0;
+    }
+}
+
 .start-rankings {
     max-height: 25vh;
     overflow-y: auto;
