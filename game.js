@@ -591,8 +591,10 @@ function updateScore() {
 function updateMobileStats() {
     const mLevel = document.getElementById('m-level');
     const mScore = document.getElementById('m-score');
+    const mLines = document.getElementById('m-lines');
     if (mLevel) mLevel.innerText = level;
     if (mScore) mScore.innerText = score.toLocaleString();
+    if (mLines) mLines.innerText = lines;
 }
 
 /**

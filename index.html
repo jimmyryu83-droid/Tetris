@@ -11,9 +11,11 @@
     <div class="mobile-header glass">
         <div class="header-stat">LV <span id="m-level">1</span></div>
         <div class="header-stat">SCORE <span id="m-score">0</span></div>
+        <div class="header-stat">LINES <span id="m-lines">0</span></div>
         <div class="header-stat">NEXT
             <canvas id="m-next-piece" width="40" height="40"></canvas>
         </div>
+        <button id="btn-pause" class="ctrl-btn glass">❚❚</button>
     </div>
     <div class="game-container">
         <div class="side-panel left">
@@ -88,16 +90,15 @@
 
     <!-- 모바일 전용 컨트롤러 (Mobile Only Controls) -->
     <div class="mobile-controls">
-        <button id="btn-pause" class="ctrl-btn glass">PAUSE</button>
         <div class="control-row">
             <div class="d-pad">
-                <button id="btn-up" class="ctrl-btn">↻</button>
                 <button id="btn-left" class="ctrl-btn">←</button>
                 <button id="btn-down" class="ctrl-btn">↓</button>
                 <button id="btn-right" class="ctrl-btn">→</button>
             </div>
             <div class="action-btns">
-                <button id="btn-hard" class="ctrl-btn">DROP</button>
+                <button id="btn-up" class="ctrl-btn rotate-btn">↻</button>
+                <button id="btn-hard" class="ctrl-btn drop-btn">DROP</button>
             </div>
         </div>
     </div>

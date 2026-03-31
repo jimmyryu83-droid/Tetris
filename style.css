@@ -255,22 +255,36 @@ button.primary-btn:hover {
 }
 
 .header-stat {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.6);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 5px;
 }
 
 .header-stat span {
     color: var(--neon-blue);
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
 #m-next-piece {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 4px;
+}
+
+#btn-pause {
+    width: 40px;
+    height: 40px;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
 }
 
 /* 모바일 전용 스타일 (Mobile Styles) */
@@ -302,15 +316,26 @@ button.primary-btn:hover {
 .d-pad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    gap: 10px;
+    grid-template-rows: 1fr;
+    gap: 15px;
 }
 
 .action-btns {
     display: flex;
-    flex-direction: column;
     gap: 15px;
-    align-items: flex-end;
+    align-items: center;
+}
+
+.rotate-btn {
+    border-color: var(--neon-blue);
+    color: var(--neon-blue);
+    background: rgba(0, 242, 255, 0.1);
+}
+
+.drop-btn {
+    border-color: var(--neon-pink);
+    color: var(--neon-pink);
+    background: rgba(255, 0, 92, 0.1);
 }
 
 .ctrl-btn {
@@ -348,17 +373,20 @@ button.primary-btn:hover {
     font-size: 0.7rem;
 }
 
-#btn-up { grid-column: 2; }
-#btn-left { grid-row: 2; grid-column: 1; }
-#btn-down { grid-row: 2; grid-column: 2; }
-#btn-right { grid-row: 2; grid-column: 3; }
+#btn-left { grid-column: 1; }
+#btn-down { grid-column: 2; }
+#btn-right { grid-column: 3; }
 
 #btn-hard {
-    width: 80px;
-    height: 80px;
-    border-color: var(--neon-pink);
-    color: var(--neon-pink);
-    font-size: 0.9rem;
+    width: 75px;
+    height: 75px;
+    font-size: 0.8rem;
+}
+
+#btn-up {
+    width: 75px;
+    height: 75px;
+    font-size: 1.5rem;
 }
 
 @media (max-width: 800px) {
@@ -433,10 +461,9 @@ button.primary-btn:hover {
     }
 
     #btn-pause {
-        position: absolute;
-        top: -60px;
-        right: 20px;
-        z-index: 110;
+        position: static;
+        width: 35px;
+        height: 35px;
     }
 
     .ctrl-btn {
