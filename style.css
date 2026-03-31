@@ -86,13 +86,10 @@ body {
 .board-container {
     padding: 10px;
     position: relative;
-    border: 2px solid var(--glass-border);
-}
-
-#tetris-board {
-    display: block;
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 8px;
+    border: 2px solid var(--neon-blue);
+    background: rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.2), inset 0 0 10px rgba(0, 242, 255, 0.1);
+    border-radius: 12px;
 }
 
 .overlay {
@@ -434,12 +431,14 @@ button.primary-btn:hover {
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 0;
-        margin: 0;
-        background: transparent;
-        box-shadow: none;
-        border: none;
-        max-height: 50vh; /* 보드가 너무 커지지 않게 제한 */
+        padding: 5px;
+        margin: 10px 0;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--neon-blue);
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+        border-radius: 12px;
+        max-height: 52vh;
+        width: min-content;
     }
 
     #tetris-board {
