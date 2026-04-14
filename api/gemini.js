@@ -42,8 +42,8 @@ export default async function handler(req, res) {
 - SABOTAGE: 다음 5번의 블록을 S/Z 블록으로 변환
 - NORMAL: 대사만 전달`;
 
-  // 3. 구글 API 직접 호출 경로 (v1 정식 버전) - 사용자 요청에 따라 업데이트
-  const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  // 3. 구글 API 직접 호출 경로 (v1beta gemini-pro 롤백 버전)
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
 
   try {
     const response = await fetch(url, {
