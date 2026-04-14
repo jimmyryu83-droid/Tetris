@@ -1,6 +1,6 @@
 /**
- * Gemini AI 개입 서버리스 함수 (Soft Error Handling 적용)
- * 지속적인 API 연결 이슈를 진단하기 위해 에러 발생 시 상세 메시지를 게임 대사로 전달합니다.
+ * Gemini AI 개입 서버리스 함수 (v1 정식 버전 최적화)
+ * 구글의 최신 정식 규격인 v1 경로를 사용하여 안정성을 확보합니다.
  */
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -11,14 +11,14 @@ export default async function handler(req, res) {
   const apiKey = process.env.ajoutetris || process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(200).json({ 
-      message: "AI 응원 대기 중... (Error: API 키가 설정되지 않음)", 
+      message: "AI 연결 대기 중... (Error: API 키가 설정되지 않음)", 
       action: "NORMAL" 
     });
   }
 
   const { score, level, lines, eventType } = req.body;
 
-  // 2. 테트리스 전용 페르소나 및 프롬프트 설정 (기존 로직 유지)
+  // 2. 테트리스 전용 페르소나 및 프롬프트 설정
   let eventContext = "";
   if (eventType === 'intervention') {
     eventContext = "플레이어의 레벨이 오르거나 점수가 대폭 상승했습니다. 당신은 게임에 개입하여 '축복'을 내리거나 '시련'을 주기로 결정했습니다.";
@@ -45,8 +45,8 @@ export default async function handler(req, res) {
 - SABOTAGE: 다음 5번의 블록을 S/Z 블록으로 변환
 - NORMAL: 대사만 전달`;
 
-  // 3. 구글 API 직접 호출 경로 (사용자 요청: v1beta + gemini-1.5-flash)
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  // 3. 구글 v1 정식 엔드포인트 사용 (최후의 정공법)
+  const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
   try {
     const response = await fetch(url, {
@@ -59,11 +59,11 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // 사용자의 'Soft Error Handling' 전략 적용: 에러 발생 시 게임 내 대사로 전달
     if (!response.ok) {
-      console.error("Google Server Response Trace:", JSON.stringify(data, null, 2));
+      console.error("Critical Error Trace:", JSON.stringify(data, null, 2));
+      // API 실패 시에도 게임이 멈추지 않도록 사용자 요청 기본 메시지 반환
       return res.status(200).json({ 
-        message: `AI 연결 대기 중... (Error: ${data.error?.message || 'API 요청 실패'})`, 
+        message: "중력이 변했습니다! 하늘을 공략하세요!", 
         action: "NORMAL" 
       });
     }
@@ -89,9 +89,9 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error("Gemini API 직접 호출 에러:", error);
+    console.error("Gemini API 전역 에러:", error);
     return res.status(200).json({ 
-      message: "AI 코치가 휴식 중입니다. (기다림이 필요할 수 있습니다)", 
+      message: "중력의 간섭이 심합니다! 계속 플레이하세요!", 
       action: "NORMAL" 
     });
   }
