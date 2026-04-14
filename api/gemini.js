@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+// 환경변수 ajou_tetris를 사용하여 API 키 초기화
 const genAI = new GoogleGenerativeAI(process.env.ajou_tetris);
 
 export default async function handler(req, res) {
@@ -10,14 +11,14 @@ export default async function handler(req, res) {
   const { score, level, lines, eventType } = req.body;
 
   try {
-    // 모델 설정: 안정성을 위해 가장 기본적인 텍스트 생성 방식 사용
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // 모델 설정: 사용자가 요청한 전체 경로(models/gemini-1.5-flash) 사용 및 코드 간소화
+    const model = genAI.getGenerativeModel({ model: "models/gemini-1.5-flash" });
 
     let eventContext = "";
     if (eventType === 'intervention') {
       eventContext = "플레이어의 레벨이 오르거나 점수가 대폭 상승했습니다. 당신은 게임에 개입하여 '축복'을 내리거나 '시련'을 주기로 결정했습니다.";
     } else if (eventType === 'sabotage') {
-      eventContext = "플레이어가 너무 잘해서 당신이 질투를 느킵니다. 방해를 선언하세요.";
+      eventContext = "플레이어가 너무 잘해서 당신이 질투를 느낍니다. 방해를 선언하세요.";
     } else {
       eventContext = "일반적인 게임 상황입니다. 위트 있는 해설을 해주세요.";
     }
@@ -39,22 +40,22 @@ export default async function handler(req, res) {
 - SABOTAGE: 다음 5번의 블록을 S/Z 블록으로 변환
 - NORMAL: 대사만 전달`;
 
+    // 가장 기본적인 generateContent 호출
     const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const text = result.response.text();
 
-    // 정규표현식을 이용해 JSON 문자열만 추출 (가장 안정적인 방식)
+    // 정규표현식을 이용해 JSON 추출
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       try {
         const jsonResponse = JSON.parse(jsonMatch[0]);
         return res.status(200).json(jsonResponse);
       } catch (e) {
-        console.error("JSON Parse Error inside match:", e);
+        console.error("JSON Parse Error:", e);
       }
     }
 
-    // 파싱 실패 시 기본 응답
+    // 파싱 실패 시 기본값 반환
     return res.status(200).json({ message: text.substring(0, 100), action: "NORMAL" });
   } catch (error) {
     console.error("Gemini API Error:", error);
