@@ -73,10 +73,17 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
+    // 사용자의 'Failsafe' 전략 적용: 503 과부하 또는 기타 에러 시 기본 응답 반환
     if (!response.ok) {
-      console.error("Discovery API Error:", JSON.stringify(data, null, 2));
+      console.error("API Error Trace:", JSON.stringify(data, null, 2));
+      
+      let fallbackMessage = "중력이 요동치고 있습니다! 하늘을 조심하세요!";
+      if (response.status === 503) {
+        fallbackMessage = "AI 서버가 북적입니다. 잠시 휴식 후 다시 기입할게요!";
+      }
+
       return res.status(200).json({ 
-        message: "반중력 모드 가동! 하늘 끝까지 쌓아보세요!", 
+        message: fallbackMessage, 
         action: "NORMAL" 
       });
     }
