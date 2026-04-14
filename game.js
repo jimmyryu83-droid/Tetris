@@ -61,9 +61,12 @@ let comboText = { text: '', opacity: 0, scale: 1 };
 const RANK_KEY = 'tetris_rankings';
 
 // --- 추가된 기능 변수 ---
-let isAntiGravity = false;
-let antiGravityTimer = null;
+let isReversedControls = false;
+let isFogActive = false;
+let reverseTimer = null;
+let fogTimer = null;
 let sabotageCount = 0; // 방해 모드 횟수 (S/Z 블록 강제 생성)
+let blessingBag = 0; // 축복 모드 (I 블록 강제 생성)
 let aiMessageTimeout = null;
 
 // 7-Bag 시스템 (7-Bag System)
@@ -74,6 +77,12 @@ let pieceBag = [];
  * Get next piece from 7-bag
  */
 function getNextPiece() {
+    // 축복 모드: I(1) 블록만 3번 내보냄
+    if (blessingBag > 0) {
+        blessingBag--;
+        return createPiece(1);
+    }
+
     // AI 방해 모드: S(5) 또는 Z(7) 블록만 5번 내보냄
     if (sabotageCount > 0) {
         sabotageCount--;
@@ -110,9 +119,62 @@ async function callGeminiAPI(eventType = 'general') {
         if (data.message) {
             showAIMessage(data.message);
         }
+        if (data.action) {
+            handleAIAction(data.action);
+        }
     } catch (error) {
         console.error("Gemini API Call Failed:", error);
     }
+}
+
+/**
+ * AI 개입 액션 처리
+ */
+function handleAIAction(action) {
+    console.log("AI Action Triggered:", action);
+    
+    switch(action) {
+        case 'FOG':
+            activateFog();
+            break;
+        case 'REVERSE':
+            activateReverse();
+            break;
+        case 'BLESSING_GHOST':
+            blessingBag = 3; // 다음 3번은 I 블록
+            showAIMessage("AI가 운명을 바꿨습니다! 'I' 블록 축복이 내립니다.");
+            break;
+        case 'SABOTAGE':
+            sabotageCount = 5;
+            startShake(500, 15);
+            break;
+        default:
+            // NORMAL 또는 정의되지 않은 코드
+            break;
+    }
+}
+
+function activateFog() {
+    isFogActive = true;
+    const boardContainer = document.querySelector('.board-container');
+    if (boardContainer) boardContainer.classList.add('fog-active');
+    
+    if (fogTimer) clearTimeout(fogTimer);
+    fogTimer = setTimeout(() => {
+        isFogActive = false;
+        if (boardContainer) boardContainer.classList.remove('fog-active');
+    }, 15000); // 15초간 지속
+}
+
+function activateReverse() {
+    isReversedControls = true;
+    document.body.classList.add('controls-reversed');
+    
+    if (reverseTimer) clearTimeout(reverseTimer);
+    reverseTimer = setTimeout(() => {
+        isReversedControls = false;
+        document.body.classList.remove('controls-reversed');
+    }, 15000); // 15초간 지속
 }
 
 /**
@@ -134,21 +196,10 @@ function showAIMessage(text) {
 }
 
 /**
- * 안티그래비티 모드 활성화
+ * 안티그래비티 모드 활성화 (사용 안 함 - 삭제 예정)
  */
 function activateAntiGravity() {
-    if (isAntiGravity) return;
-    
-    isAntiGravity = true;
-    document.body.classList.add('anti-gravity');
-    callGeminiAPI('anti-gravity');
-
-    if (antiGravityTimer) clearTimeout(antiGravityTimer);
-    antiGravityTimer = setTimeout(() => {
-        isAntiGravity = false;
-        document.body.classList.remove('anti-gravity');
-        showAIMessage("중력이 정상으로 돌아왔습니다.");
-    }, 20000); // 20초간 지속
+    // 삭제됨: 이전 안티그래비티 로직
 }
 
 const player = {
@@ -463,24 +514,13 @@ function playerRotate(dir) {
  * Player drop
  */
 function playerDrop() {
-    if (isAntiGravity) {
-        player.pos.y--; // 위로 상승
-        if (collide(board, player)) {
-            player.pos.y++;
-            merge(board, player);
-            playerReset();
-            arenaSweep();
-            updateScore();
-        }
-    } else {
-        player.pos.y++; // 아래로 하강
-        if (collide(board, player)) {
-            player.pos.y--;
-            merge(board, player);
-            playerReset();
-            arenaSweep();
-            updateScore();
-        }
+    player.pos.y++; // 아래로 하강
+    if (collide(board, player)) {
+        player.pos.y--;
+        merge(board, player);
+        playerReset();
+        arenaSweep();
+        updateScore();
     }
     dropCounter = 0;
 }
@@ -531,13 +571,7 @@ function playerReset() {
     player.matrix = player.next;
     player.next = getNextPiece();
     
-    if (isAntiGravity) {
-        // 안티그래비티 모드: 맨 아래에서 생성
-        player.pos.y = ROWS - player.matrix.length;
-    } else {
-        player.pos.y = 0;
-    }
-    
+    player.pos.y = 0;
     player.pos.x = (board[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
     
     if (collide(board, player)) {
@@ -563,11 +597,7 @@ function arenaSweep() {
         createParticles(y, rowColor);
 
         const row = board.splice(y, 1)[0].fill(0);
-        if (isAntiGravity) {
-            board.push(row); // 아래쪽 블록들을 위로 밀어올림
-        } else {
-            board.unshift(row); // 위쪽 블록들을 아래로 내림
-        }
+        board.unshift(row); // 위쪽 블록들을 아래로 내림
         ++y;
         rowCount++;
     }
@@ -599,14 +629,10 @@ function arenaSweep() {
         }
         
         score += addedScore;
-        const oldLines = lines;
         lines += rowCount;
         
-        // 안티그래비티 발동 조건: 5줄마다 발동
-        if (Math.floor(lines / 5) > Math.floor(oldLines / 5)) {
-            activateAntiGravity();
-        } else if (rowCount >= 2) {
-            // 그 외에는 가끔 일반 응원 (2줄 이상 지웠을 때)
+        if (rowCount >= 3) {
+            // 3줄 이상 지웠을 때 가끔 일반 응원
             callGeminiAPI('general');
         }
 
@@ -670,8 +696,8 @@ function checkLevelUp() {
             setTimeout(() => addTraps(trapCount), 500);
         }
         
-        // 레벨업 시 AI 멘트
-        callGeminiAPI('general');
+        // 레벨업 시 AI 개입 (intervention)
+        callGeminiAPI('intervention');
 
         comboText = {
             text: `LEVEL ${level} UP!`,
@@ -897,14 +923,21 @@ function restartGame() {
     lastTime = 0; // lastTime 리셋 추가
 
     // --- 추가된 상태 초기화 ---
-    isAntiGravity = false;
-    if (antiGravityTimer) clearTimeout(antiGravityTimer);
+    isReversedControls = false;
+    isFogActive = false;
+    if (reverseTimer) clearTimeout(reverseTimer);
+    if (fogTimer) clearTimeout(fogTimer);
     sabotageCount = 0;
-    document.body.classList.remove('anti-gravity');
+    blessingBag = 0;
+    
+    document.body.classList.remove('controls-reversed');
+    const boardContainer = document.querySelector('.board-container');
+    if (boardContainer) boardContainer.classList.remove('fog-active');
     document.getElementById('ai-message-container').classList.add('hidden');
     
     document.getElementById('game-over').classList.add('hidden');
     document.getElementById('pause-overlay').classList.add('hidden');
+
     updateScore();
     playerReset();
     update(0);
@@ -987,10 +1020,10 @@ document.addEventListener('keydown', event => {
 
     switch(event.code) {
         case 'ArrowLeft':
-            playerMove(-1);
+            playerMove(isReversedControls ? 1 : -1);
             break;
         case 'ArrowRight':
-            playerMove(1);
+            playerMove(isReversedControls ? -1 : 1);
             break;
         case 'ArrowDown':
             playerDrop();
@@ -1063,8 +1096,8 @@ const addTouchListener = (id, action) => {
     });
 };
 
-addTouchListener('btn-left', () => playerMove(-1));
-addTouchListener('btn-right', () => playerMove(1));
+addTouchListener('btn-left', () => playerMove(isReversedControls ? 1 : -1));
+addTouchListener('btn-right', () => playerMove(isReversedControls ? -1 : 1));
 addTouchListener('btn-up', () => playerRotate(-1));
 addTouchListener('btn-down', () => playerDrop());
 addTouchListener('btn-hard', () => playerHardDrop());

@@ -673,20 +673,34 @@ button.primary-btn:hover {
     to { transform: translate(-50%, 0); opacity: 1; }
 }
 
-/* 안티그래비티 활성화 시 효과 */
-body.anti-gravity {
-    background-image: 
-        radial-gradient(circle at 20% 30%, rgba(188, 19, 254, 0.1) 0%, transparent 40%),
-        radial-gradient(circle at 80% 70%, rgba(188, 19, 254, 0.1) 0%, transparent 40%);
-    transition: background 1s ease;
+/* 안개 활성화 시 효과 */
+.fog-active #tetris-board {
+    filter: blur(8px);
+    transition: filter 0.5s ease;
 }
 
-.anti-gravity .board-container {
-    border-color: var(--neon-purple);
-    box-shadow: 0 0 30px rgba(188, 19, 254, 0.4);
+.fog-active::after {
+    content: "FOG ACTIVE";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.2);
+    pointer-events: none;
+    letter-spacing: 5px;
 }
 
-.anti-gravity .stat-box h2 {
-    color: var(--neon-purple);
+/* 조작 반전 활성화 시 효과 */
+body.controls-reversed .board-container {
+    border-color: #ff005c;
+    box-shadow: 0 0 30px rgba(255, 0, 92, 0.4);
 }
+
+body.controls-reversed .ai-msg-box {
+    border-color: #ff005c;
+    box-shadow: 0 0 20px rgba(255, 0, 92, 0.3);
+}
+
 

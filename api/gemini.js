@@ -12,20 +12,46 @@ export default async function handler(req, res) {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    let prompt = "";
-    if (eventType === 'anti-gravity') {
-      prompt = `현재 테트리스 게임 중 '안티그래비티(반중력)' 모드가 시작되었습니다! 블록이 위로 솟구칩니다. 플레이어에게 "중력이 사라졌습니다! 위를 조심하세요!" 같은 위트 있는 경고와 응원 멘트를 한국어로 한 문장만 짧고 강렬하게 생성해줘.`;
+    let eventContext = "";
+    if (eventType === 'intervention') {
+      eventContext = "플레이어의 레벨이 오르거나 점수가 대폭 상승했습니다. 당신은 게임에 개입하여 '축복'을 내리거나 '시련'을 주기로 결정했습니다.";
     } else if (eventType === 'sabotage') {
-      prompt = `현재 테트리스 게임 점수가 ${score}점으로 매우 높습니다. 당신은 질투가 많은 AI입니다. 플레이어를 방해하겠다고 선언하며 "흥, 너무 쉬워 보이는데? 이건 어때?" 같은 도전적이고 위트 있는 멘트를 한국어로 한 문장만 생성해줘.`;
+      eventContext = "플레이어가 너무 잘해서 당신이 질투를 느낍니다. 방해를 선언하세요.";
     } else {
-      prompt = `현재 테트리스 게임 상태: 점수 ${score}, 레벨 ${level}, 지운 줄 ${lines}. 게임 중인 플레이어에게 짧고 유머러스한 한국어 응원이나 해설 멘트를 한 문장만 생성해줘.`;
+      eventContext = "일반적인 게임 상황입니다. 위트 있는 해설을 해주세요.";
     }
+
+    const prompt = `당신은 테트리스 게임의 감시자이자 변덕스러운 AI입니다.
+현재 상황: 점수 ${score}, 레벨 ${level}, 지운 줄 ${lines}.
+컨텍스트: ${eventContext}
+
+다음 JSON 형식으로만 응답하세요:
+{
+  "message": "플레이어에게 전달할 위트 있는 한국어 메시지 (한 문장)",
+  "action": "아래 작업 코드 중 하나"
+}
+
+작업 코드(action):
+- "FOG": 15초간 화면을 안개로 가리는 시련 (난이도 상승)
+- "REVERSE": 15초간 좌우 조작을 반대로 바꾸는 시련 (혼란 유발)
+- "BLESSING_GHOST": 다음 3번의 블록을 모두 'I' 블록으로 바꿔주는 축복 (위기 탈출)
+- "SABOTAGE": 다음 5번의 블록을 S나 Z 블록으로만 내보내는 방해
+- "NORMAL": 아무 물리적 변화 없이 대사만 전달
+
+상황이 좋을수록 시련("FOG", "REVERSE", "SABOTAGE")을 줄 확률이 높고, 상황이 나쁘거나 레벨업 직후라면 축복("BLESSING_GHOST")을 줄 확률이 있습니다.`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
 
-    return res.status(200).json({ message: text });
+    // JSON 추출 (Gemini가 마크다운 블록 등을 포함할 수 있으므로)
+    const jsonMatch = text.match(/\{.*\}/s);
+    if (jsonMatch) {
+      const jsonResponse = JSON.parse(jsonMatch[0]);
+      return res.status(200).json(jsonResponse);
+    }
+
+    return res.status(200).json({ message: text, action: "NORMAL" });
   } catch (error) {
     console.error("Gemini API Error:", error);
     return res.status(500).json({ error: "AI 응답을 가져오는 중 오류가 발생했습니다." });
