@@ -1,21 +1,24 @@
 /**
- * Gemini AI 우회 경로 (Direct Fetch 방식)
- * SDK 라이브러리의 404/400 매핑 오류를 방지하기 위해 Google API를 직접 호출합니다.
+ * Gemini AI 개입 서버리스 함수 (Soft Error Handling 적용)
+ * 지속적인 API 연결 이슈를 진단하기 위해 에러 발생 시 상세 메시지를 게임 대사로 전달합니다.
  */
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // 1. API 키 확인 (멀티 환경변수 대응: ajoutetris 우선)
-  const apiKey = process.env.ajoutetris || process.env.ajou_tetris || process.env.GEMINI_API_KEY;
+  // 1. API 키 확인 (ajoutetris 우선 확인)
+  const apiKey = process.env.ajoutetris || process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: "API 키가 설정되지 않았습니다. Vercel 환경변수(ajoutetris)를 확인해주세요." });
+    return res.status(200).json({ 
+      message: "AI 응원 대기 중... (Error: API 키가 설정되지 않음)", 
+      action: "NORMAL" 
+    });
   }
 
   const { score, level, lines, eventType } = req.body;
 
-  // 2. 테트리스 전용 페르소나 및 프롬프트 설정
+  // 2. 테트리스 전용 페르소나 및 프롬프트 설정 (기존 로직 유지)
   let eventContext = "";
   if (eventType === 'intervention') {
     eventContext = "플레이어의 레벨이 오르거나 점수가 대폭 상승했습니다. 당신은 게임에 개입하여 '축복'을 내리거나 '시련'을 주기로 결정했습니다.";
@@ -42,8 +45,8 @@ export default async function handler(req, res) {
 - SABOTAGE: 다음 5번의 블록을 S/Z 블록으로 변환
 - NORMAL: 대사만 전달`;
 
-  // 3. 구글 API 직접 호출 경로 (v1 정식 버전 + gemini-pro 범용 명칭)
-  const url = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`;
+  // 3. 구글 API 직접 호출 경로 (사용자 요청: v1beta + gemini-1.5-flash)
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
   try {
     const response = await fetch(url, {
@@ -56,16 +59,19 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // v1 응답 확인 및 상세 로깅
+    // 사용자의 'Soft Error Handling' 전략 적용: 에러 발생 시 게임 내 대사로 전달
     if (!response.ok) {
-      console.error("Google Server Response (v1 Error):", JSON.stringify(data, null, 2));
-      throw new Error(data.error?.message || 'API 요청 실패');
+      console.error("Google Server Response Trace:", JSON.stringify(data, null, 2));
+      return res.status(200).json({ 
+        message: `AI 연결 대기 중... (Error: ${data.error?.message || 'API 요청 실패'})`, 
+        action: "NORMAL" 
+      });
     }
 
-    // 결과 텍스트 추출 (v1 API 응답 구조)
+    // 결과 텍스트 추출
     const text = data.candidates[0].content.parts[0].text;
 
-    // JSON 추출 및 파싱 로직 (기존 게임 로직 유지)
+    // JSON 추출 및 파싱 로직
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       try {
@@ -84,9 +90,9 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error("Gemini API 직접 호출 에러:", error);
-    return res.status(500).json({ 
-      error: "AI 응답 생성 중 오류가 발생했습니다.",
-      details: error.message 
+    return res.status(200).json({ 
+      message: "AI 코치가 휴식 중입니다. (기다림이 필요할 수 있습니다)", 
+      action: "NORMAL" 
     });
   }
 }
