@@ -115,7 +115,13 @@ async function callGeminiAPI(eventType = 'general') {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ score, level, lines, eventType })
         });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
+        
         if (data.message) {
             showAIMessage(data.message);
         }
@@ -124,6 +130,8 @@ async function callGeminiAPI(eventType = 'general') {
         }
     } catch (error) {
         console.error("Gemini API Call Failed:", error);
+        // 에러 발생 시에도 사용자 흐름이 끊기지 않도록 기본 메시지 출력
+        showAIMessage("AI 코치가 분석 중입니다... 계속 기운 내세요!");
     }
 }
 
@@ -178,7 +186,7 @@ function activateReverse() {
 }
 
 /**
- * AI 메시지 화면 표시
+ * AI 메시지 화면 표시 (말풍선 UI 적용)
  */
 function showAIMessage(text) {
     const container = document.getElementById('ai-message-container');
@@ -186,13 +194,20 @@ function showAIMessage(text) {
     
     if (!container || !textField) return;
 
+    // 이전 타이머 제거 및 애니메이션 초기화
+    if (aiMessageTimeout) {
+        clearTimeout(aiMessageTimeout);
+        container.classList.add('hidden');
+        void container.offsetWidth; // Reflow 트리거 (CSS 애니메이션 재시작용)
+    }
+
     textField.innerText = text;
     container.classList.remove('hidden');
 
-    if (aiMessageTimeout) clearTimeout(aiMessageTimeout);
+    // 6초 후 숨김 (기존 5초에서 가독성을 위해 소폭 상향)
     aiMessageTimeout = setTimeout(() => {
         container.classList.add('hidden');
-    }, 5000); // 5초 후 숨김
+    }, 6000);
 }
 
 /**
