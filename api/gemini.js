@@ -1,18 +1,27 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// 환경변수 ajou_tetris를 사용하여 API 키 초기화
-const genAI = new GoogleGenerativeAI(process.env.ajou_tetris);
-
+/**
+ * Gemini AI 개입 서버리스 함수
+ */
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // 1. API 키 확인 (사용자가 설정한 ajou_tetris 또는 기본값 확인)
+  const apiKey = process.env.ajou_tetris || process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: "API 키가 설정되지 않았습니다. Vercel 환경변수를 확인해주세요." });
+  }
+
+  const genAI = new GoogleGenerativeAI(apiKey);
   const { score, level, lines, eventType } = req.body;
 
   try {
-    // 모델 설정: 사용자가 요청한 전체 경로(models/gemini-1.5-flash) 사용 및 코드 간소화
-    const model = genAI.getGenerativeModel({ model: "models/gemini-1.5-flash" });
+    // 2. 모델 설정 (사용자 요청에 따라 가장 안정적인 경로 명칭 사용)
+    const model = genAI.getGenerativeModel({ 
+      model: "models/gemini-1.5-flash" 
+    });
 
     let eventContext = "";
     if (eventType === 'intervention') {
@@ -40,25 +49,33 @@ export default async function handler(req, res) {
 - SABOTAGE: 다음 5번의 블록을 S/Z 블록으로 변환
 - NORMAL: 대사만 전달`;
 
-    // 가장 기본적인 generateContent 호출
+    // 3. 안정적인 요청 및 응답 처리
     const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    const response = await result.response;
+    const text = response.text();
 
-    // 정규표현식을 이용해 JSON 추출
+    // JSON 추출 및 파싱
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       try {
         const jsonResponse = JSON.parse(jsonMatch[0]);
         return res.status(200).json(jsonResponse);
-      } catch (e) {
-        console.error("JSON Parse Error:", e);
+      } catch (parseError) {
+        console.error("JSON 파싱 에러:", parseError);
       }
     }
 
-    // 파싱 실패 시 기본값 반환
-    return res.status(200).json({ message: text.substring(0, 100), action: "NORMAL" });
+    // 파싱 실패 시 기본 응답 구조 반환
+    return res.status(200).json({ 
+      message: text.substring(0, 100), 
+      action: "NORMAL" 
+    });
+
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    return res.status(500).json({ error: "AI 응답을 가져오는 중 오류가 발생했습니다." });
+    console.error("Gemini API 상세 에러:", error);
+    return res.status(500).json({ 
+      error: "AI 응답 생성 중 오류가 발생했습니다.",
+      details: error.message 
+    });
   }
 }
