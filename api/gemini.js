@@ -18,9 +18,9 @@ export default async function handler(req, res) {
   const { score, level, lines, eventType } = req.body;
 
   try {
-    // 2. 모델 설정 (사용자 요청에 따라 가장 안정적인 경로 명칭 사용)
+    // 2. 모델 설정 (사용자 요청에 따라 gemini-1.5-flash-latest 사용)
     const model = genAI.getGenerativeModel({ 
-      model: "models/gemini-1.5-flash" 
+      model: "gemini-1.5-flash-latest" 
     });
 
     let eventContext = "";
