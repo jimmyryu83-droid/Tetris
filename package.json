@@ -1,0 +1,9 @@
+{
+  "name": "neon-tetris-gemini",
+  "version": "1.0.0",
+  "description": "Tetris with Gemini AI integration",
+  "main": "index.html",
+  "dependencies": {
+    "@google/generative-ai": "^0.3.1"
+  }
+}

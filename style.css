@@ -632,3 +632,61 @@ button.primary-btn:hover {
     border-radius: 8px;
     margin-top: 10px;
 }
+
+/* AI 메시지 스타일 */
+.ai-msg-box {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--neon-purple);
+    border-radius: 12px;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 500;
+    animation: slideDown 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    box-shadow: 0 0 20px rgba(188, 19, 254, 0.3);
+}
+
+.ai-msg-box.hidden {
+    display: none;
+}
+
+.ai-avatar {
+    font-size: 1.5rem;
+}
+
+#ai-message-text {
+    font-size: 0.9rem;
+    color: white;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+@keyframes slideDown {
+    from { transform: translate(-50%, -40px); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+/* 안티그래비티 활성화 시 효과 */
+body.anti-gravity {
+    background-image: 
+        radial-gradient(circle at 20% 30%, rgba(188, 19, 254, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(188, 19, 254, 0.1) 0%, transparent 40%);
+    transition: background 1s ease;
+}
+
+.anti-gravity .board-container {
+    border-color: var(--neon-purple);
+    box-shadow: 0 0 30px rgba(188, 19, 254, 0.4);
+}
+
+.anti-gravity .stat-box h2 {
+    color: var(--neon-purple);
+}
+

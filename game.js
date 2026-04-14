@@ -60,6 +60,12 @@ let comboText = { text: '', opacity: 0, scale: 1 };
 // 랭킹 키 (LocalStorage Key)
 const RANK_KEY = 'tetris_rankings';
 
+// --- 추가된 기능 변수 ---
+let isAntiGravity = false;
+let antiGravityTimer = null;
+let sabotageCount = 0; // 방해 모드 횟수 (S/Z 블록 강제 생성)
+let aiMessageTimeout = null;
+
 // 7-Bag 시스템 (7-Bag System)
 let pieceBag = [];
 
@@ -68,6 +74,13 @@ let pieceBag = [];
  * Get next piece from 7-bag
  */
 function getNextPiece() {
+    // AI 방해 모드: S(5) 또는 Z(7) 블록만 5번 내보냄
+    if (sabotageCount > 0) {
+        sabotageCount--;
+        const type = Math.random() > 0.5 ? 5 : 7;
+        return createPiece(type);
+    }
+
     if (pieceBag.length === 0) {
         pieceBag = [1, 2, 3, 4, 5, 6, 7];
         // Shuffle bag
@@ -81,7 +94,62 @@ function getNextPiece() {
 
 // 게임 설정 (Game Settings)
 const dropIntervals = [1000, 900, 800, 700, 600, 500, 400, 300, 200, 100]; // 1~10단계 속도
-const linesPerLevel = 20; // 레벨업 기준 줄 수 (테스트 완료 후 20줄로 원복)
+let linesPerLevel = 10; // 레벨업 기준 줄 수 (기존 20에서 10으로 하향)
+
+/**
+ * Gemini API 호출 (Vercel Serverless Function)
+ */
+async function callGeminiAPI(eventType = 'general') {
+    try {
+        const response = await fetch('/api/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ score, level, lines, eventType })
+        });
+        const data = await response.json();
+        if (data.message) {
+            showAIMessage(data.message);
+        }
+    } catch (error) {
+        console.error("Gemini API Call Failed:", error);
+    }
+}
+
+/**
+ * AI 메시지 화면 표시
+ */
+function showAIMessage(text) {
+    const container = document.getElementById('ai-message-container');
+    const textField = document.getElementById('ai-message-text');
+    
+    if (!container || !textField) return;
+
+    textField.innerText = text;
+    container.classList.remove('hidden');
+
+    if (aiMessageTimeout) clearTimeout(aiMessageTimeout);
+    aiMessageTimeout = setTimeout(() => {
+        container.classList.add('hidden');
+    }, 5000); // 5초 후 숨김
+}
+
+/**
+ * 안티그래비티 모드 활성화
+ */
+function activateAntiGravity() {
+    if (isAntiGravity) return;
+    
+    isAntiGravity = true;
+    document.body.classList.add('anti-gravity');
+    callGeminiAPI('anti-gravity');
+
+    if (antiGravityTimer) clearTimeout(antiGravityTimer);
+    antiGravityTimer = setTimeout(() => {
+        isAntiGravity = false;
+        document.body.classList.remove('anti-gravity');
+        showAIMessage("중력이 정상으로 돌아왔습니다.");
+    }, 20000); // 20초간 지속
+}
 
 const player = {
     pos: { x: 0, y: 0 },
@@ -395,13 +463,24 @@ function playerRotate(dir) {
  * Player drop
  */
 function playerDrop() {
-    player.pos.y++;
-    if (collide(board, player)) {
-        player.pos.y--;
-        merge(board, player);
-        playerReset();
-        arenaSweep();
-        updateScore();
+    if (isAntiGravity) {
+        player.pos.y--; // 위로 상승
+        if (collide(board, player)) {
+            player.pos.y++;
+            merge(board, player);
+            playerReset();
+            arenaSweep();
+            updateScore();
+        }
+    } else {
+        player.pos.y++; // 아래로 하강
+        if (collide(board, player)) {
+            player.pos.y--;
+            merge(board, player);
+            playerReset();
+            arenaSweep();
+            updateScore();
+        }
     }
     dropCounter = 0;
 }
@@ -452,7 +531,13 @@ function playerReset() {
     player.matrix = player.next;
     player.next = getNextPiece();
     
-    player.pos.y = 0;
+    if (isAntiGravity) {
+        // 안티그래비티 모드: 맨 아래에서 생성
+        player.pos.y = ROWS - player.matrix.length;
+    } else {
+        player.pos.y = 0;
+    }
+    
     player.pos.x = (board[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
     
     if (collide(board, player)) {
@@ -478,7 +563,11 @@ function arenaSweep() {
         createParticles(y, rowColor);
 
         const row = board.splice(y, 1)[0].fill(0);
-        board.unshift(row);
+        if (isAntiGravity) {
+            board.push(row); // 아래쪽 블록들을 위로 밀어올림
+        } else {
+            board.unshift(row); // 위쪽 블록들을 아래로 내림
+        }
         ++y;
         rowCount++;
     }
@@ -510,7 +599,17 @@ function arenaSweep() {
         }
         
         score += addedScore;
+        const oldLines = lines;
         lines += rowCount;
+        
+        // 안티그래비티 발동 조건: 5줄마다 발동
+        if (Math.floor(lines / 5) > Math.floor(oldLines / 5)) {
+            activateAntiGravity();
+        } else if (rowCount >= 2) {
+            // 그 외에는 가끔 일반 응원 (2줄 이상 지웠을 때)
+            callGeminiAPI('general');
+        }
+
         checkLevelUp();
     } else {
         combo = 0;
@@ -547,6 +646,22 @@ function addTraps(count) {
  */
 function checkLevelUp() {
     const newLevel = Math.min(10, Math.floor(lines / linesPerLevel) + 1);
+    
+    // AI 방해 공작 체크: 점수가 5000점 단위로 오를 때마다 40% 확률로 발동
+    const sabotageThreshold = 5000;
+    if (Math.floor(score / sabotageThreshold) > Math.floor((score - 1000) / sabotageThreshold)) {
+        if (Math.random() < 0.4 && sabotageCount === 0) {
+            sabotageCount = 5;
+            startShake(500, 15); // 강한 진동
+            callGeminiAPI('sabotage');
+            comboText = {
+                text: `SABOTAGE!`,
+                opacity: 1,
+                scale: 1.5
+            };
+        }
+    }
+
     if (newLevel !== level) {
         level = newLevel;
         // 레벨업 보너스: 함정 생성 (레벨에 비례하여 증가)
@@ -555,6 +670,9 @@ function checkLevelUp() {
             setTimeout(() => addTraps(trapCount), 500);
         }
         
+        // 레벨업 시 AI 멘트
+        callGeminiAPI('general');
+
         comboText = {
             text: `LEVEL ${level} UP!`,
             opacity: 1,
@@ -777,6 +895,14 @@ function restartGame() {
     gameOver = false;
     paused = false;
     lastTime = 0; // lastTime 리셋 추가
+
+    // --- 추가된 상태 초기화 ---
+    isAntiGravity = false;
+    if (antiGravityTimer) clearTimeout(antiGravityTimer);
+    sabotageCount = 0;
+    document.body.classList.remove('anti-gravity');
+    document.getElementById('ai-message-container').classList.add('hidden');
+    
     document.getElementById('game-over').classList.add('hidden');
     document.getElementById('pause-overlay').classList.add('hidden');
     updateScore();
