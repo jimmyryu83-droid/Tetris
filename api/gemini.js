@@ -7,10 +7,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // 1. API 키 확인 (멀티 환경변수 대응)
-  const apiKey = process.env.ajou_tetris || process.env.GEMINI_API_KEY;
+  // 1. API 키 확인 (멀티 환경변수 대응: ajoutetris 우선)
+  const apiKey = process.env.ajoutetris || process.env.ajou_tetris || process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: "API 키가 설정되지 않았습니다. Vercel 환경변수를 확인해주세요." });
+    return res.status(500).json({ error: "API 키가 설정되지 않았습니다. Vercel 환경변수(ajoutetris)를 확인해주세요." });
   }
 
   const { score, level, lines, eventType } = req.body;
