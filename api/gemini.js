@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env['ajou-tetris']);
+const genAI = new GoogleGenerativeAI(process.env.ajou_tetris);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
