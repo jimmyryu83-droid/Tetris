@@ -1,38 +1,31 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
 /**
- * Gemini AI 개입 서버리스 함수
+ * Gemini AI 우회 경로 (Direct Fetch 방식)
+ * SDK 라이브러리의 404/400 매핑 오류를 방지하기 위해 Google API를 직접 호출합니다.
  */
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // 1. API 키 확인 (사용자가 설정한 ajou_tetris 또는 기본값 확인)
+  // 1. API 키 확인 (멀티 환경변수 대응)
   const apiKey = process.env.ajou_tetris || process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(500).json({ error: "API 키가 설정되지 않았습니다. Vercel 환경변수를 확인해주세요." });
   }
 
-  const genAI = new GoogleGenerativeAI(apiKey);
   const { score, level, lines, eventType } = req.body;
 
-  try {
-    // 2. 모델 설정 (사용자 요청에 따라 gemini-1.5-flash-latest 사용)
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash-latest" 
-    });
+  // 2. 테트리스 전용 페르소나 및 프롬프트 설정
+  let eventContext = "";
+  if (eventType === 'intervention') {
+    eventContext = "플레이어의 레벨이 오르거나 점수가 대폭 상승했습니다. 당신은 게임에 개입하여 '축복'을 내리거나 '시련'을 주기로 결정했습니다.";
+  } else if (eventType === 'sabotage') {
+    eventContext = "플레이어가 너무 잘해서 당신이 질투를 느낍니다. 방해를 선언하세요.";
+  } else {
+    eventContext = "일반적인 게임 상황입니다. 위트 있는 해설을 해주세요.";
+  }
 
-    let eventContext = "";
-    if (eventType === 'intervention') {
-      eventContext = "플레이어의 레벨이 오르거나 점수가 대폭 상승했습니다. 당신은 게임에 개입하여 '축복'을 내리거나 '시련'을 주기로 결정했습니다.";
-    } else if (eventType === 'sabotage') {
-      eventContext = "플레이어가 너무 잘해서 당신이 질투를 느낍니다. 방해를 선언하세요.";
-    } else {
-      eventContext = "일반적인 게임 상황입니다. 위트 있는 해설을 해주세요.";
-    }
-
-    const prompt = `당신은 테트리스 게임의 감시자이자 변덕스러운 AI입니다.
+  const prompt = `당신은 테트리스 게임의 감시자이자 변덕스러운 AI입니다.
 현재 상황: 점수 ${score}, 레벨 ${level}, 지운 줄 ${lines}.
 컨텍스트: ${eventContext}
 
@@ -49,12 +42,28 @@ export default async function handler(req, res) {
 - SABOTAGE: 다음 5번의 블록을 S/Z 블록으로 변환
 - NORMAL: 대사만 전달`;
 
-    // 3. 안정적인 요청 및 응답 처리
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+  // 3. 구글 API 직접 호출 경로 (v1beta 버전) - Bypass
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
-    // JSON 추출 및 파싱
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }]
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error?.message || 'API 요청 실패');
+    }
+
+    // 결과 텍스트 추출 (Direct API 응답 구조)
+    const text = data.candidates[0].content.parts[0].text;
+
+    // JSON 추출 및 파싱 로직 (기존 게임 로직 유지)
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       try {
@@ -72,7 +81,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error("Gemini API 상세 에러:", error);
+    console.error("Gemini API 직접 호출 에러:", error);
     return res.status(500).json({ 
       error: "AI 응답 생성 중 오류가 발생했습니다.",
       details: error.message 
