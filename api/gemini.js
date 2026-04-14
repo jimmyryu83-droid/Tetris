@@ -10,17 +10,14 @@ export default async function handler(req, res) {
   const { score, level, lines, eventType } = req.body;
 
   try {
-    // 모델 설정: 최신 gemini-1.5-flash 사용 및 JSON 응답 모드 활성화
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
-      generationConfig: { responseMimeType: "application/json" }
-    });
+    // 모델 설정: 안정성을 위해 가장 기본적인 텍스트 생성 방식 사용
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     let eventContext = "";
     if (eventType === 'intervention') {
       eventContext = "플레이어의 레벨이 오르거나 점수가 대폭 상승했습니다. 당신은 게임에 개입하여 '축복'을 내리거나 '시련'을 주기로 결정했습니다.";
     } else if (eventType === 'sabotage') {
-      eventContext = "플레이어가 너무 잘해서 당신이 질투를 느낍니다. 방해를 선언하세요.";
+      eventContext = "플레이어가 너무 잘해서 당신이 질투를 느킵니다. 방해를 선언하세요.";
     } else {
       eventContext = "일반적인 게임 상황입니다. 위트 있는 해설을 해주세요.";
     }
@@ -29,9 +26,9 @@ export default async function handler(req, res) {
 현재 상황: 점수 ${score}, 레벨 ${level}, 지운 줄 ${lines}.
 컨텍스트: ${eventContext}
 
-다음 JSON 스키마를 따르는 응답을 한국어로 생성하세요:
+다음 JSON 형식으로만 응답하세요. 마크다운 기호를 포함하지 마세요.
 {
-  "message": "string (플레이어에게 전달할 위트 있는 한국어 메시지)",
+  "message": "플레이어에게 전달할 위트 있는 한국어 메시지 (한 문장)",
   "action": "FOG | REVERSE | BLESSING_GHOST | SABOTAGE | NORMAL"
 }
 
@@ -46,14 +43,19 @@ export default async function handler(req, res) {
     const response = await result.response;
     const text = response.text();
 
-    try {
-      const jsonResponse = JSON.parse(text);
-      return res.status(200).json(jsonResponse);
-    } catch (parseError) {
-      // JSON 파싱 실패 시 fallback
-      console.error("JSON Parse Error:", parseError, "Raw text:", text);
-      return res.status(200).json({ message: text.substring(0, 100), action: "NORMAL" });
+    // 정규표현식을 이용해 JSON 문자열만 추출 (가장 안정적인 방식)
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        const jsonResponse = JSON.parse(jsonMatch[0]);
+        return res.status(200).json(jsonResponse);
+      } catch (e) {
+        console.error("JSON Parse Error inside match:", e);
+      }
     }
+
+    // 파싱 실패 시 기본 응답
+    return res.status(200).json({ message: text.substring(0, 100), action: "NORMAL" });
   } catch (error) {
     console.error("Gemini API Error:", error);
     return res.status(500).json({ error: "AI 응답을 가져오는 중 오류가 발생했습니다." });
