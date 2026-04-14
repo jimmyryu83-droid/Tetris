@@ -42,7 +42,7 @@ export default async function handler(req, res) {
 - SABOTAGE: 다음 5번의 블록을 S/Z 블록으로 변환
 - NORMAL: 대사만 전달`;
 
-  // 3. 구글 API 직접 호출 경로 (v1beta 버전) - Bypass
+  // 3. 구글 API 직접 호출 경로 (v1beta 버전) - 사용자 요청 경로 재검증
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
   try {
@@ -56,11 +56,13 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
+    // 404 또는 에러 발생 시 상세 로깅 추가 (사용자 요청사항)
     if (!response.ok) {
+      console.error("Google Server Response (Error):", JSON.stringify(data, null, 2));
       throw new Error(data.error?.message || 'API 요청 실패');
     }
 
-    // 결과 텍스트 추출 (Direct API 응답 구조)
+    // 결과 텍스트 추출
     const text = data.candidates[0].content.parts[0].text;
 
     // JSON 추출 및 파싱 로직 (기존 게임 로직 유지)
