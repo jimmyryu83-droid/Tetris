@@ -483,6 +483,7 @@ button.primary-btn:hover {
     transform: scale(0.95);
 }
 
+/* 일시정지 버튼 (Desktop Default) */
 #btn-pause {
     position: fixed;
     top: 70px;
@@ -490,6 +491,18 @@ button.primary-btn:hover {
     width: 50px;
     height: 50px;
     font-size: 0.7rem;
+    display: none; /* 데스크톱에서는 필요 없음 (P키) */
+}
+
+/* 모바일 전용 헤더 내 버튼 스타일 (Override) */
+@media (max-width: 800px) {
+    #btn-pause {
+        display: flex;
+        position: static; /* 헤더 Flex 안으로 복귀 */
+        width: 40px;
+        height: 40px;
+        margin: 0;
+    }
 }
 
 #btn-left { grid-column: 1; }
@@ -625,6 +638,11 @@ button.primary-btn:hover {
     .board-container {
         max-height: 40vh;
     }
+    /* 작은 화면에서 AI 말풍선 위치 조정 */
+    .ai-msg-box {
+        top: 5px;
+        padding: 8px 12px;
+    }
 }
 
 #next-piece {
@@ -636,12 +654,12 @@ button.primary-btn:hover {
 /* AI 말풍선 스타일 (Speech Bubble) */
 .ai-msg-box {
     position: absolute;
-    top: 15px;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    width: 85%;
-    max-width: 260px;
-    background: rgba(11, 14, 20, 0.9);
+    width: 90%;
+    max-width: 280px;
+    background: rgba(11, 14, 20, 0.95);
     backdrop-filter: blur(15px);
     border: 1px solid var(--neon-purple);
     border-radius: 18px;
@@ -700,11 +718,12 @@ button.primary-btn:hover {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 1.5rem;
+    font-size: clamp(1rem, 5vw, 1.5rem); /* 반응형 폰트 크기 */
     font-weight: 700;
     color: rgba(255, 255, 255, 0.2);
     pointer-events: none;
     letter-spacing: 5px;
+    white-space: nowrap;
 }
 
 /* 조작 반전 활성화 시 효과 */
@@ -716,6 +735,18 @@ body.controls-reversed .board-container {
 body.controls-reversed .ai-msg-box {
     border-color: #ff005c;
     box-shadow: 0 0 20px rgba(255, 0, 92, 0.3);
+}
+
+/* 조작 반전 시 모바일 버튼 색상 변경 */
+body.controls-reversed .ctrl-btn {
+    border-color: #ff005c;
+    color: #ff005c;
+    background: rgba(255, 0, 92, 0.05);
+}
+
+body.controls-reversed .ctrl-btn:active {
+    background: #ff005c;
+    color: white;
 }
 
 

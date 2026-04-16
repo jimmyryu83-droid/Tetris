@@ -10,9 +10,9 @@ export default async function handler(req, res) {
   // 1. API 키 확인 (ajoutetris 우선 확인)
   const apiKey = process.env.ajoutetris || process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.status(200).json({ 
-      message: "AI 엔진 예열 중... (준비가 더 필요합니다)", 
-      action: "NORMAL" 
+    return res.status(200).json({
+      message: "AI 엔진 예열 중... (준비가 더 필요합니다)",
+      action: "NORMAL"
     });
   }
 
@@ -21,15 +21,15 @@ export default async function handler(req, res) {
     const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
     const listResponse = await fetch(listUrl);
     const listData = await listResponse.json();
-    
+
     // 'generateContent'를 지원하는 모델 중 가장 최신(flash -> pro 순)을 가급적 찾습니다.
     const models = listData.models || [];
-    let availableModel = models.find(m => m.name.includes('gemini-1.5-flash'))?.name 
-                         || models.find(m => m.supportedGenerationMethods.includes('generateContent'))?.name;
+    let availableModel = models.find(m => m.name.includes('gemini-1.5-flash'))?.name
+      || models.find(m => m.supportedGenerationMethods.includes('generateContent'))?.name;
 
     // 만약 리스트 조회가 실패하거나 모델을 못 찾으면 하드코딩된 기본값 사용
     if (!availableModel) {
-      availableModel = "models/gemini-pro"; 
+      availableModel = "models/gemini-pro";
     }
 
     const { score, level, lines, eventType } = req.body;
@@ -76,15 +76,15 @@ export default async function handler(req, res) {
     // 사용자의 'Failsafe' 전략 적용: 503 과부하 또는 기타 에러 시 기본 응답 반환
     if (!response.ok) {
       console.error("API Error Trace:", JSON.stringify(data, null, 2));
-      
+
       let fallbackMessage = "중력이 요동치고 있습니다! 하늘을 조심하세요!";
       if (response.status === 503) {
         fallbackMessage = "AI 서버가 북적입니다. 잠시 휴식 후 다시 기입할게요!";
       }
 
-      return res.status(200).json({ 
-        message: fallbackMessage, 
-        action: "NORMAL" 
+      return res.status(200).json({
+        message: fallbackMessage,
+        action: "NORMAL"
       });
     }
 
@@ -102,16 +102,16 @@ export default async function handler(req, res) {
       }
     }
 
-    return res.status(200).json({ 
-      message: text.substring(0, 100), 
-      action: "NORMAL" 
+    return res.status(200).json({
+      message: text.substring(0, 100),
+      action: "NORMAL"
     });
 
   } catch (error) {
     console.error("Ultimate Strategy Error:", error);
-    return res.status(200).json({ 
-      message: "AI 엔진 예열 중... (중력이 불안정합니다!)", 
-      action: "NORMAL" 
+    return res.status(200).json({
+      message: "AI 엔진 예열 중... (중력이 불안정합니다!)",
+      action: "NORMAL"
     });
   }
 }

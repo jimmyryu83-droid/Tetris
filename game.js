@@ -121,6 +121,7 @@ async function callGeminiAPI(eventType = 'general') {
         }
 
         const data = await response.json();
+        console.log("Gemini API Response:", data);
         
         if (data.message) {
             showAIMessage(data.message);
@@ -131,7 +132,13 @@ async function callGeminiAPI(eventType = 'general') {
     } catch (error) {
         console.error("Gemini API Call Failed:", error);
         // 에러 발생 시에도 사용자 흐름이 끊기지 않도록 기본 메시지 출력
-        showAIMessage("AI 코치가 분석 중입니다... 계속 기운 내세요!");
+        if (eventType === 'general') {
+            showAIMessage("AI 코치가 당신의 플레이를 분석하며 미소 짓고 있어요! 계속 화이팅!");
+        } else if (eventType === 'sabotage') {
+            showAIMessage("기계의 반격이 시작되었습니다! 정신 바짝 차리세요!");
+        } else {
+            showAIMessage("AI 통신 지연 중... 하지만 당신의 실력은 변함없죠!");
+        }
     }
 }
 
@@ -144,17 +151,21 @@ function handleAIAction(action) {
     switch(action) {
         case 'FOG':
             activateFog();
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // 모바일 진동 피드백
             break;
         case 'REVERSE':
             activateReverse();
+            if (navigator.vibrate) navigator.vibrate(200);
             break;
         case 'BLESSING_GHOST':
             blessingBag = 3; // 다음 3번은 I 블록
             showAIMessage("AI가 운명을 바꿨습니다! 'I' 블록 축복이 내립니다.");
+            if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
             break;
         case 'SABOTAGE':
             sabotageCount = 5;
             startShake(500, 15);
+            if (navigator.vibrate) navigator.vibrate([300, 100, 300]);
             break;
         default:
             // NORMAL 또는 정의되지 않은 코드
